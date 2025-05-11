@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Wedding Service Broker</title>
+</head>
+<body>
+<h1>Welcome to the Wedding Service Broker</h1>
+<form action="/services" method="get">
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+    <label for="location">Location:</label>
+    <input type="text" id="location" name="location" required>
+    <button type="submit">Find Services</button>
+</form>
+</body>
+</html>
