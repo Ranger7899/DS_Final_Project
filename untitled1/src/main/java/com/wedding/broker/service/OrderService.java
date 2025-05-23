@@ -4,13 +4,14 @@ import com.wedding.broker.client.VenueClient;
 import com.wedding.broker.model.Order;
 import com.wedding.broker.model.OrderRequest;
 import com.wedding.broker.model.Reservation;
+import com.wedding.broker.model.OrderServiceReservation; // Import the new entity
 import com.wedding.broker.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+// import java.util.HashMap; // No longer needed for direct Map storage
+// import java.util.Map; // No longer needed for direct Map storage
 
 @Service
 public class OrderService {
@@ -40,11 +41,10 @@ public class OrderService {
             order.setDate(orderRequest.getDate());
             order.setLocation(orderRequest.getLocation());
 
-            // Populate services map with venue reservation
-            Map<String, Order.ServiceReservation> services = new HashMap<>();
-//            services.put("venue", new Order.ServiceReservation(
-//                    venueReservation.getSupplierId(), venueReservation.getServiceId(), venueReservation.getId()));
-            order.setServices(services);
+            // Populate services list with venue reservation
+            OrderServiceReservation venueOrderService = new OrderServiceReservation(
+                    order, "venue", venueReservation.getSupplierId(), venueReservation.getServiceId(), venueReservation.getId());
+            order.getServices().add(venueOrderService); // Add to the list
 
             order.setStatus("confirmed");
             order.setCreatedAt(LocalDateTime.now());

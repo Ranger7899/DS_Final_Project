@@ -1,45 +1,47 @@
 package com.wedding.broker.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List; // Changed from Map to List for relational mapping
+import java.util.ArrayList; // Added for initializing the list
 
-@Document(collection = "orders")
+@Entity
+@Table(name = "orders") // Map to a table named 'orders'
 public class Order {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-incrementing ID
+    private Long id; // Changed type to Long
+
     private String userId;
     private String date;
     private String location;
-    private Map<String, ServiceReservation> services;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderServiceReservation> services = new ArrayList<>(); // One-to-Many relationship
+
     private String status;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public static class ServiceReservation {
-        private String supplierId;
-        private String serviceId;
-        private String reservationId;
-
-        public String getSupplierId() { return supplierId; }
-        public void setSupplierId(String supplierId) { this.supplierId = supplierId; }
-        public String getServiceId() { return serviceId; }
-        public void setServiceId(String serviceId) { this.serviceId = serviceId; }
-        public String getReservationId() { return reservationId; }
-        public void setReservationId(String reservationId) { this.reservationId = reservationId; }
+    // Default constructor required by JPA
+    public Order() {
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
-    public Map<String, ServiceReservation> getServices() { return services; }
-    public void setServices(Map<String, ServiceReservation> services) { this.services = services; }
+    public List<OrderServiceReservation> getServices() { return services; }
+    public void setServices(List<OrderServiceReservation> services) { this.services = services; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
