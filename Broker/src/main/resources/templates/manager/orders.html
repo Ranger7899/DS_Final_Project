@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Manage Orders</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .no-orders { color: #888; font-style: italic; }
+  </style>
+</head>
+<body>
+<h1>All Customer Orders</h1>
+
+<div th:if="${orders.isEmpty()}" class="no-orders">
+  <p>No orders found in the database.</p>
+</div>
+
+<table th:unless="${orders.isEmpty()}">
+  <thead>
+  <tr>
+    <th>Order ID</th>
+    <th>User ID</th>
+    <th>Date</th>
+    <th>Location</th>
+    <th>Status</th>
+    <th>Created At</th>
+    <th>Updated At</th>
+    <th>Services</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="order : ${orders}">
+    <td th:text="${order.id}"></td>
+    <td th:text="${order.userId}"></td>
+    <td th:text="${order.date}"></td>
+    <td th:text="${order.location}"></td>
+    <td th:text="${order.status}"></td>
+    <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+    <td th:text="${#temporals.format(order.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+    <td>
+      <ul th:if="${not #lists.isEmpty(order.services)}">
+        <li th:each="service : ${order.services}">
+          <span th:text="${service.serviceType}"></span>:
+          Supplier ID: <span th:text="${service.supplierId}"></span>,
+          Service ID: <span th:text="${service.serviceId}"></span>,
+          Reservation ID: <span th:text="${service.reservationId}"></span>
+        </li>
+      </ul>
+      <span th:if="${#lists.isEmpty(order.services)}">- No services -</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<p><a href="/">Back to Home</a></p>
+</body>
+</html>
