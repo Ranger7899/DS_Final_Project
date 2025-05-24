@@ -1,21 +1,17 @@
 package com.wedding.venue.model;
 
-import java.time.LocalDate; // Import for LocalDate
-
 public class Venue {
     private String id;
     private String name;
     private String location;
-    private LocalDate date; // Use LocalDate for dates
-    private boolean available;
+    private boolean available; // This will now represent if the venue is generally available, not on a specific date.
 
     public Venue() {}
 
-    public Venue(String id, String name, String location, LocalDate date, boolean available) {
+    public Venue(String id, String name, String location, boolean available) {
         this.id = id;
         this.name = name;
         this.location = location;
-        this.date = date;
         this.available = available;
     }
 
@@ -26,8 +22,6 @@ public class Venue {
     public void setName(String name) { this.name = name; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }
 }

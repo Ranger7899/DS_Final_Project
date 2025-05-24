@@ -1,3 +1,4 @@
+// src/main/java/com/wedding/venue/controller/VenueController.java
 package com.wedding.venue.controller;
 
 import com.wedding.venue.model.Reservation;
@@ -5,6 +6,7 @@ import com.wedding.venue.model.ReserveRequest;
 import com.wedding.venue.model.Venue;
 import com.wedding.venue.service.VenueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,28 +26,37 @@ public class VenueController {
     }
 
     @PostMapping("/reserve")
-    public ResponseEntity<Reservation> reserveVenue(@RequestBody ReserveRequest request) {
-        Reservation reservation = venueService.reserveVenue(
-                request.getVenueId(),
-                request.getDate(),
-                request.getLocation(),
-                request.getTimeout()
-        );
-        if (reservation != null) {
+    public ResponseEntity<?> reserveVenue(@RequestBody ReserveRequest request) {
+        try {
+            Reservation reservation = venueService.reserveVenue(
+                    request.getVenueId(),
+                    request.getDate(),
+                    request.getLocation(),
+                    request.getTimeout()
+            );
             return ResponseEntity.ok(reservation);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        return ResponseEntity.badRequest().build(); // Or a more specific error
     }
 
     @PostMapping("/confirm/{id}")
-    public ResponseEntity<Void> confirmReservation(@PathVariable String id) {
-        venueService.confirmReservation(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> confirmReservation(@PathVariable String id) {
+        try {
+            venueService.confirmReservation(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PostMapping("/cancel/{id}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable String id) {
-        venueService.cancelReservation(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> cancelReservation(@PathVariable String id) {
+        try {
+            venueService.cancelReservation(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

@@ -2,9 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Available Services</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .venue-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    .venue-card h3 { margin-top: 0; }
+    .reserve-button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+    .reserve-button:hover { background-color: #45a049; }
+    .no-venues { color: #888; font-style: italic; }
+  </style>
 </head>
 <body>
 <h1>Available Services for <span th:text="${date}"></span> at <span th:text="${location}"></span></h1>
+
+<div th:if="${venues.isEmpty()}" class="no-venues">
+  <p>No venues found for the selected date and location. Please try a different search.</p>
+</div>
+
+<div th:each="venue : ${venues}" class="venue-card">
+  <h3 th:text="${venue.name}">Venue Name</h3>
+  <p><strong>Location:</strong> <span th:text="${venue.location}">Venue Location</span></p>
+  <p><strong>Available:</strong> <span th:text="${venue.available ? 'Yes' : 'No'}">Available</span></p>
+
+  <form th:action="@{/order}" method="post">
+    <input type="hidden" name="venueId" th:value="${venue.id}" />
+    <input type="hidden" name="date" th:value="${date}" />
+    <input type="hidden" name="location" th:value="${location}" />
+    <input type="hidden" name="userId" value="testUser123" /> <button type="submit" class="reserve-button">Reserve This Venue</button>
+  </form>
+</div>
+
+<p><a href="/">Back to Home</a></p>
 
 </body>
 </html>

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
+import java.util.stream.Collectors; // Import for stream operations
 
 @Repository
 public class ReservationRepository {
@@ -20,6 +21,12 @@ public class ReservationRepository {
 
     public Optional<Reservation> findById(String id) {
         return Optional.ofNullable(reservations.get(id));
+    }
+
+    public List<Reservation> findByDate(String date) {
+        return reservations.values().stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .collect(Collectors.toList());
     }
 
     public Reservation save(Reservation reservation) {

@@ -1,7 +1,9 @@
 package com.wedding.venue.repository;
 
 import com.wedding.venue.model.Venue;
+import com.wedding.venue.model.Reservation; // Import Reservation
 import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired; // Autowire ReservationRepository
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,27 +12,30 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.UUID; // For generating unique IDs
+import java.util.UUID;
 
 @Repository
 public class VenueRepository {
     private final Map<String, Venue> venues = new ConcurrentHashMap<>();
 
+    @Autowired
+    private ReservationRepository reservationRepository; // Autowire ReservationRepository
+
     public VenueRepository() {
         // Initialize with some dummy venues for testing
-        // Make some venues available
-        Venue venue1 = new Venue(UUID.randomUUID().toString(), "Grand Ballroom", "New York", LocalDate.of(2025, 12, 24), true);
-        Venue venue2 = new Venue(UUID.randomUUID().toString(), "Crystal Hall", "Los Angeles", LocalDate.of(2025, 12, 24), true);
-        Venue venue3 = new Venue(UUID.randomUUID().toString(), "Riverside Place", "New York", LocalDate.of(2025, 12, 25), true);
-        Venue venue4 = new Venue(UUID.randomUUID().toString(), "Historic Mansion", "London", LocalDate.of(2025, 12, 24), true);
+        // Venues are now generally available, not date-specific in their definition
+        Venue venue1 = new Venue(UUID.randomUUID().toString(), "Grand Ballroom", "New York", true);
+        Venue venue2 = new Venue(UUID.randomUUID().toString(), "Crystal Hall", "Los Angeles", true);
+        Venue venue3 = new Venue(UUID.randomUUID().toString(), "Riverside Place", "New York", true);
+        Venue venue4 = new Venue(UUID.randomUUID().toString(), "Historic Mansion", "London", true);
 
         venues.put(venue1.getId(), venue1);
         venues.put(venue2.getId(), venue2);
         venues.put(venue3.getId(), venue3);
         venues.put(venue4.getId(), venue4);
 
-        // Make one venue unavailable for a specific date/location combination
-        Venue unavailableVenue = new Venue(UUID.randomUUID().toString(), "Unavailable Hall", "New York", LocalDate.of(2025, 12, 24), false);
+        // A venue that is generally unavailable (e.g., undergoing renovation)
+        Venue unavailableVenue = new Venue(UUID.randomUUID().toString(), "Unavailable Hall", "New York", false);
         venues.put(unavailableVenue.getId(), unavailableVenue);
     }
 
@@ -43,10 +48,21 @@ public class VenueRepository {
     }
 
     public List<Venue> findAvailableVenues(LocalDate date, String location) {
-        return venues.values().stream()
+        // Get all venues that are generally available and in the specified location
+        List<Venue> potentialVenues = venues.values().stream()
                 .filter(venue -> venue.isAvailable() &&
-                        venue.getDate().equals(date) &&
                         venue.getLocation().equalsIgnoreCase(location))
+                .collect(Collectors.toList());
+
+        // Filter out venues that have existing 'confirmed' or 'pending' reservations for the given date
+        List<Reservation> reservationsForDate = reservationRepository.findByDate(date.toString()); // Assuming date is stored as string in Reservation
+        List<String> reservedVenueIds = reservationsForDate.stream()
+                .filter(r -> r.getStatus().equals("confirmed") || r.getStatus().equals("pending"))
+                .map(Reservation::getVenueId)
+                .collect(Collectors.toList());
+
+        return potentialVenues.stream()
+                .filter(venue -> !reservedVenueIds.contains(venue.getId()))
                 .collect(Collectors.toList());
     }
 
