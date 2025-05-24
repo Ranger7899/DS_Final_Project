@@ -1,4 +1,3 @@
-// src/main/java/com/wedding/venue/service/VenueService.java
 package com.wedding.venue.service;
 
 import com.wedding.venue.model.Reservation;
@@ -9,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays; // Import Arrays for List.of()
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class VenueService {
@@ -27,8 +26,7 @@ public class VenueService {
         return venueRepository.findAvailableVenues(date, location);
     }
 
-    public Reservation reserveVenue(String venueId, String dateString, String location, int timeout) {
-        LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
+    public Reservation reserveVenue(Long venueId, LocalDate date, String location, int timeout) {
         Optional<Venue> optionalVenue = venueRepository.findById(venueId);
 
         if (optionalVenue.isEmpty()) {
@@ -37,34 +35,30 @@ public class VenueService {
 
         Venue venue = optionalVenue.get();
 
-        // First, check if the venue is generally available
+        // Check if the venue is generally available
         if (!venue.isAvailable()) {
-            throw new RuntimeException("Venue with ID " + venueId + " is not generally available.");
+            throw new RuntimeException("Venue '" + venue.getName() + "' is not generally available.");
         }
 
-        // Now, check if there's an existing reservation for this venue on this date
-        List<Reservation> existingReservations = reservationRepository.findByDate(dateString);
-        boolean isAlreadyReserved = existingReservations.stream()
-                .anyMatch(r -> r.getVenueId().equals(venueId) &&
-                        r.getStatus().equals("pending") || r.getStatus().equals("confirmed"));
+        // Check for existing 'pending' or 'confirmed' reservations for this venue on this date
+        List<Reservation> existingReservations = reservationRepository.findByVenueIdAndDateAndStatusIn(
+                venueId, date, Arrays.asList("pending", "confirmed"));
 
-        if (isAlreadyReserved) {
-            throw new RuntimeException("Venue with ID " + venueId + " is already reserved for " + dateString + ".");
+        if (!existingReservations.isEmpty()) {
+            throw new RuntimeException("Venue '" + venue.getName() + "' is already reserved for " + date + ".");
         }
 
-        // Create and save the reservation
+        // Create a new reservation
         Reservation reservation = new Reservation(
-                "res-" + ThreadLocalRandom.current().nextInt(1000, 9999), // Dummy ID
                 venueId,
-                dateString, // Store date as string in Reservation
+                date,
                 location,
-                "pending"
+                "pending" // Initial status
         );
-        reservationRepository.save(reservation);
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
-    public void confirmReservation(String reservationId) {
+    public void confirmReservation(Long reservationId) { // Changed ID type to Long
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
         if (optionalReservation.isPresent()) {
             Reservation reservation = optionalReservation.get();
@@ -75,7 +69,7 @@ public class VenueService {
         }
     }
 
-    public void cancelReservation(String reservationId) {
+    public void cancelReservation(Long reservationId) { // Changed ID type to Long
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
         if (optionalReservation.isPresent()) {
             Reservation reservation = optionalReservation.get();

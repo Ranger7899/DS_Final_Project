@@ -1,4 +1,3 @@
-// src/main/java/com/wedding/venue/controller/VenueController.java
 package com.wedding.venue.controller;
 
 import com.wedding.venue.model.Reservation;
@@ -29,8 +28,8 @@ public class VenueController {
     public ResponseEntity<?> reserveVenue(@RequestBody ReserveRequest request) {
         try {
             Reservation reservation = venueService.reserveVenue(
-                    request.getVenueId(),
-                    request.getDate(),
+                    request.getVenueId(), // Now a Long
+                    request.getDate(),    // Now a LocalDate
                     request.getLocation(),
                     request.getTimeout()
             );
@@ -41,7 +40,7 @@ public class VenueController {
     }
 
     @PostMapping("/confirm/{id}")
-    public ResponseEntity<?> confirmReservation(@PathVariable String id) {
+    public ResponseEntity<?> confirmReservation(@PathVariable Long id) { // Changed ID type to Long
         try {
             venueService.confirmReservation(id);
             return ResponseEntity.ok().build();
@@ -51,7 +50,7 @@ public class VenueController {
     }
 
     @PostMapping("/cancel/{id}")
-    public ResponseEntity<?> cancelReservation(@PathVariable String id) {
+    public ResponseEntity<?> cancelReservation(@PathVariable Long id) { // Changed ID type to Long
         try {
             venueService.cancelReservation(id);
             return ResponseEntity.ok().build();

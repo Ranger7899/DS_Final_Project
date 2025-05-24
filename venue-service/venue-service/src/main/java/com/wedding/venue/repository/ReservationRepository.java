@@ -1,43 +1,20 @@
 package com.wedding.venue.repository;
 
 import com.wedding.venue.model.Reservation;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.UUID;
-import java.util.stream.Collectors; // Import for stream operations
 
 @Repository
-public class ReservationRepository {
-    private final Map<String, Reservation> reservations = new ConcurrentHashMap<>();
+public interface ReservationRepository extends JpaRepository<Reservation, Long> { // Extend JpaRepository and specify entity and ID type
 
-    public List<Reservation> findAll() {
-        return new ArrayList<>(reservations.values());
-    }
+    // Custom method to find reservations by venue ID, date, and a list of statuses.
+    // This will be useful for checking if a venue is already reserved on a specific date.
+    List<Reservation> findByVenueIdAndDateAndStatusIn(Long venueId, LocalDate date, List<String> statuses);
 
-    public Optional<Reservation> findById(String id) {
-        return Optional.ofNullable(reservations.get(id));
-    }
-
-    public List<Reservation> findByDate(String date) {
-        return reservations.values().stream()
-                .filter(reservation -> reservation.getDate().equals(date))
-                .collect(Collectors.toList());
-    }
-
-    public Reservation save(Reservation reservation) {
-        if (reservation.getId() == null) {
-            reservation.setId(UUID.randomUUID().toString());
-        }
-        reservations.put(reservation.getId(), reservation);
-        return reservation;
-    }
-
-    public void deleteById(String id) {
-        reservations.remove(id);
-    }
+    // You can also add more specific finder methods if needed, e.g.,
+    // Optional<Reservation> findById(Long id); // Already provided by JpaRepository
+    // List<Reservation> findByVenueId(Long venueId);
 }

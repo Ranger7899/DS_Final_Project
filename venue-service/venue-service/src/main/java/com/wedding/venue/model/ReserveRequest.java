@@ -1,14 +1,16 @@
 package com.wedding.venue.model;
 
+import java.time.LocalDate; // Import LocalDate
+
 public class ReserveRequest {
-    private String venueId;
-    private String date;
+    private Long venueId; // Changed type to Long
+    private LocalDate date; // Changed type to LocalDate
     private String location;
-    private int timeout; // Not strictly needed on the receiving end for logic, but good for matching
+    private int timeout;
 
     public ReserveRequest() {}
 
-    public ReserveRequest(String venueId, String date, String location, int timeout) {
+    public ReserveRequest(Long venueId, LocalDate date, String location, int timeout) {
         this.venueId = venueId;
         this.date = date;
         this.location = location;
@@ -16,10 +18,10 @@ public class ReserveRequest {
     }
 
     // Getters and setters
-    public String getVenueId() { return venueId; }
-    public void setVenueId(String venueId) { this.venueId = venueId; }
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public Long getVenueId() { return venueId; }
+    public void setVenueId(Long venueId) { this.venueId = venueId; }
+    public LocalDate getDate() { return date; } // Getter returns LocalDate
+    public void setDate(LocalDate date) { this.date = date; } // Setter accepts LocalDate
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
     public int getTimeout() { return timeout; }
