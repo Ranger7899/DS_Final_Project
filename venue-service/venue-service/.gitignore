@@ -6,7 +6,7 @@ target/
 
 
 
-.properties
+!**.properties
 
 ### STS ###
 .apt_generated
