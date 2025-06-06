@@ -26,17 +26,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // .authorizeHttpRequests(auth -> auth
+                //         .requestMatchers("/", "/home", "/services", "/services/**", "/order", "/images/**", "/css/**", "/js/**").permitAll()
+                //         .requestMatchers("/manager/**").hasRole("MANAGER")
+                //         .anyRequest().authenticated()
+                // )
+                // .oauth2Login(oauth2Login -> oauth2Login
+                //         .userInfoEndpoint(userInfo -> userInfo
+                //                 .userAuthoritiesMapper(userAuthoritiesMapper())
+                //         )
+                // )
+                // .oauth2ResourceServer(oauth2 -> oauth2.jwt());
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/services/**", "/order", "/images/**", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/manager/**").hasRole("MANAGER")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // Allow all requests without authentication
                 )
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userAuthoritiesMapper(userAuthoritiesMapper())
-                        )
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+                .csrf().disable(); // Disable CSRF for testing (optional, use with caution)
         return http.build();
     }
 

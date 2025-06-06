@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Wedding Service Broker</title>
+  <title>Marry Me Maybe</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Montserrat', sans-serif;
     }
     h1, h2 {
       font-family: 'Great Vibes', cursive;
@@ -25,22 +25,46 @@
       transform: translateY(-5px);
       box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     }
+    /* Added rule to make input field text black */
+    input[type="date"], input[type="text"] {
+      color: #000000 !important;
+    }
+    /* Added rule to make input field text black */
+    input[type="date"], select {
+      color: #000000 !important;
+    }
+    /* Enable smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
   <!-- Hero Section -->
-  <section class="hero-bg min-h-screen flex items-center justify-center text-white py-12">
+  <section id="hero" class="hero-bg min-h-screen flex items-center justify-center text-white py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="text-5xl sm:text-6xl md:text-7xl font-bold text-pink-200 mb-4">Plan Your Dream Wedding</h1>
       <p class="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8">Find the perfect venues and photography services for your special day.</p>
-      <form action="/services" method="get" class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg max-w-lg mx-auto space-y-4">
+      <form action="/services" method="get" class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg max-w-lg mx-auto space-y-4 text-left">
         <div>
-          <label for="date" class="block text-sm font-medium text-gray-700">Wedding Date</label>
-          <input type="date" id="date" name="date" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+          <label for="date" class="block text-lg font-medium text-gray-700">Wedding Date</label>
+          <input type="date" id="date" name="date" placeholder="Please select a date..." required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
         </div>
         <div>
-          <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-          <input type="text" id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+          <label for="location" class="block text-lg font-medium text-gray-700">Location</label>
+          <select id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+            <option value="" disabled selected>Select a location...</option>
+            <option value="Paris, France">Paris, France</option>
+            <option value="New York, NY, USA">New York, NY, USA</option>
+            <option value="Tuscany, Italy">Tuscany, Italy</option>
+            <option value="Santorini, Greece">Santorini, Greece</option>
+            <option value="Maui, HI, USA">Maui, HI, USA</option>
+            <option value="London, UK">London, UK</option>
+            <option value="Bali, Indonesia">Bali, Indonesia</option>
+            <option value="Cape Town, South Africa">Cape Town, South Africa</option>
+            <option value="Sydney, Australia">Sydney, Australia</option>
+            <option value="Las Vegas, NV, USA">Las Vegas, NV, USA</option>
+          </select>
         </div>
         <div>
           <button type="submit" class="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Find Your Perfect Wedding</button>
@@ -78,13 +102,13 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 class="text-4xl text-pink-600 mb-6">Ready to Start Planning?</h2>
       <p class="text-lg text-gray-700 mb-8">Let us help you create the wedding of your dreams with our trusted venue and photography services.</p>
-      <a href="#search" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Get Started Now</a>
+      <a href="#hero" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Get Started Now</a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="py-8 bg-gray-800 text-white text-center">
-    <p>&copy; 2025 Wedding Service Broker. All rights reserved.</p>
+    <p>© 2025 Wedding Service Broker. All rights reserved.</p>
   </footer>
 </body>
 </html>

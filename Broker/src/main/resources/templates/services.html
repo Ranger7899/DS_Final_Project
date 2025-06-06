@@ -1,47 +1,122 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Available Services</title>
+  <title>Wedding Services</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great_Vibes&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to bottom, #fff5f5, #fff);
-    }
-    h1 {
-      font-family: 'Great Vibes', cursive;
-    }
+    body { font-family: 'Montserrat', sans-serif; }
+    h1, h2, h3 { font-family: 'Great_Vibes', cursive; }
+    .selected { border: 2px solid #10B981; background-color: #F0FDF4; }
+    .card { transition: all 0.2s ease; }
+    .card:hover { transform: translateY(-2px); }
   </style>
+  <script>
+    let selectedVenue = null;
+    let selectedPhotographer = null;
+
+    function toggleSelection(element, type, id, price) {
+      if (type === 'venue') {
+        if (selectedVenue === id) {
+          element.classList.remove('selected');
+          selectedVenue = null;
+        } else {
+          document.querySelectorAll('.venue-card.selected').forEach(el => el.classList.remove('selected'));
+          element.classList.add('selected');
+          selectedVenue = id;
+        }
+      } else {
+        if (selectedPhotographer === id) {
+          element.classList.remove('selected');
+          selectedPhotographer = null;
+        } else {
+          document.querySelectorAll('.photographer-card.selected').forEach(el => el.classList.remove('selected'));
+          element.classList.add('selected');
+          selectedPhotographer = id;
+        }
+      }
+      updateTotal();
+      updateBookButton();
+    }
+
+    function updateTotal() {
+      let total = 0;
+      const venueEl = document.querySelector('.venue-card.selected');
+      const photographerEl = document.querySelector('.photographer-card.selected');
+      if (venueEl) total += parseInt(venueEl.dataset.price);
+      if (photographerEl) total += parseInt(photographerEl.dataset.price);
+      document.getElementById('total-price').textContent = `Total: $${total.toLocaleString()}`;
+    }
+
+    function updateBookButton() {
+      const button = document.getElementById('book-button');
+      const form = document.getElementById('booking-form');
+      button.disabled = !selectedVenue && !selectedPhotographer;
+      form.action = `/booking?venueId=${selectedVenue || ''}&photographerId=${selectedPhotographer || ''}&date=${form.dataset.date}&location=${form.dataset.location}`;
+    }
+  </script>
 </head>
-<body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    <h1 class="text-4xl text-pink-600 text-center mb-8">Available Services for <span th:text="${date}"></span> at <span th:text="${location}"></span></h1>
-
-    <div th:if="${venues.isEmpty()}" class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-md">
-      <p>No venues found for the selected date and location. Please try a different search.</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" th:unless="${venues.isEmpty()}">
-      <div th:each="venue : ${venues}" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2" th:text="${venue.name}">Venue Name</h3>
-        <p class="text-gray-600"><strong>Location:</strong> <span th:text="${venue.location}">Venue Location</span></p>
-        <p class="text-gray-600"><strong>Available:</strong> <span th:text="${venue.available ? 'Yes' : 'No'}">Available</span></p>
-        <form th:action="@{/order}" method="post" class="mt-4">
-          <input type="hidden" name="venueId" th:value="${venue.id}" />
-          <input type="hidden" name="date" th:value="${date}" />
-          <input type="hidden" name="location" th:value="${location}" />
-          <input type="hidden" name="userId" value="testUser123" />
-          <button type="submit" class="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">Reserve This Venue</button>
+<body class="bg-gray-50">
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-4xl text-pink-600 text-center mb-8" th:text="'Available Services in ' + ${location} + ' on ' + ${date}"></h2>
+      <div class="flex justify-center mb-6">
+        <div class="flex items-center space-x-4 text-gray-700 text-sm">
+          <span class="text-gray-400">1. Search</span>
+          <span>→</span>
+          <span class="font-bold">2. Select</span>
+          <span>→</span>
+          <span class="text-gray-400">3. Book</span>
+          <span>→</span>
+          <span class="text-gray-400">4. Confirm</span>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-8">
+        <!-- Venues Column -->
+        <div class="w-full md:w-1/2">
+          <h3 class="text-2xl text-gray-800 mb-4">Venues</h3>
+          <div th:if="${not #lists.isEmpty(venues)}" class="space-y-4">
+            <div th:each="venue : ${venues}" class="venue-card card bg-white p-6 rounded-lg shadow-md cursor-pointer" th:data-price="${venue.price}" th:data-id="${venue.id}" onclick="toggleSelection(this, 'venue', '${venue.id}', ${venue.price})">
+              <img th:src="${venue.image}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
+              <h4 class="text-xl font-bold text-gray-800" th:text="${venue.name}"></h4>
+              <p class="text-gray-600" th:text="'Price: $' + ${venue.price}"></p>
+              <p class="text-gray-600" th:text="'Style: ' + ${venue.style}"></p>
+              <p class="text-gray-600" th:text="'Capacity: ' + ${venue.capacity} + ' guests'"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${venue.rating} + '/5'"></p>
+            </div>
+          </div>
+          <div th:if="${#lists.isEmpty(venues)}" class="text-gray-700">
+            <p th:text="'No venues available for ' + ${location} + ' on ' + ${date} + '.'"></p>
+            <p>Try <a th:href="@{/(date=${date.minusDays(1)},location=${location})}" class="text-pink-600">a different date</a> or <a th:href="@{/(date=${date},location='Tuscany, Italy')}" class="text-pink-600">another location</a>.</p>
+          </div>
+        </div>
+        <!-- Photographers Column -->
+        <div class="w-full md:w-1/2">
+          <h3 class="text-2xl text-gray-800 mb-4">Photographers</h3>
+          <div th:if="${not #lists.isEmpty(photographers)}" class="space-y-4">
+            <div th:each="photographer : ${photographers}" class="photographer-card card bg-white p-6 rounded-lg shadow-md cursor-pointer" th:data-price="${photographer.price}" th:data-id="${photographer.id}" onclick="toggleSelection(this, 'photographer', '${photographer.id}', ${photographer.price})">
+              <img th:src="${photographer.image}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
+              <h4 class="text-xl font-bold text-gray-800" th:text="${photographer.name}"></h4>
+              <p class="text-gray-600" th:text="'Price: $' + ${photographer.price}"></p>
+              <p class="text-gray-600" th:text="'Style: ' + ${photographer.style}"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${photographer.rating} + '/5'"></p>
+            </div>
+          </div>
+          <div th:if="${#lists.isEmpty(photographers)}" class="text-gray-700">
+            <p th:text="'No photographers available for ' + ${location} + ' on ' + ${date} + '.'"></p>
+            <p>Try <a th:href="@{/(date=${date.minusDays(1)},location=${location})}" class="text-pink-600">a different date</a> or <a th:href="@{/(date=${date},location='Tuscany, Italy')}" class="text-pink-600">another location</a>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 text-center">
+        <p id="total-price" class="text-lg font-bold text-gray-800">Total: $0</p>
+        <form id="booking-form" th:data-date="${date}" th:data-location="${location}">
+          <button id="book-button" type="submit" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium" disabled>Book Selection</button>
         </form>
       </div>
     </div>
-
-    <div class="mt-6 text-center">
-      <a href="/" class="inline-block px-6 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">Back to Home</a>
-    </div>
-  </div>
+  </section>
 </body>
 </html>
