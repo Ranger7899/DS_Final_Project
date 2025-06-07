@@ -7,13 +7,17 @@ import com.wedding.broker.client.VenueClient; // Import VenueClient
 import com.wedding.broker.model.Venue; // Import Venue model
 import com.wedding.broker.client.PhotographerClient; // Import PhotographerClient
 import com.wedding.broker.model.Photographer; // Import Photographer model
+import com.wedding.broker.model.Reservation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -87,20 +91,100 @@ public class UserController {
     //     return "services";
     // }
 
-    @PostMapping("/order")
-    public String placeOrder(OrderRequest orderRequest) {
-        try {
-            orderService.placeOrder(orderRequest);
-            return "redirect:/confirmation"; // Redirect to a confirmation page on success
-        } catch (RuntimeException e) {
-            // Handle reservation failure, e.g., redirect to an error page or show a message
-            return "redirect:/error?message=" + e.getMessage();
+    @GetMapping("/confirm")
+    public String booking(@RequestParam(required = false) String venueId,
+                        @RequestParam(required = false) String photographerId,
+                        @RequestParam String date,
+                        @RequestParam String location,
+                        Model model) {
+
+        Venue venue = null;
+        Photographer photographer = null;
+        int totalPrice = 0;
+        String reservationId = null;
+
+        if (venueId != null && !venueId.isEmpty()) {
+            // Reserve venue
+            // Reservation reservation = venueClient.reserve(venueId, date, location, 30); // 30-minute timeout
+            // reservationId = reservation.getId();
+            // Fetch venue details (assuming a method to get venue by ID)
+            venue = venueClient.getVenueById(venueId); // Implement this in VenueClient
+            totalPrice += venue.getPrice();
         }
+
+        if (photographerId != null && !photographerId.isEmpty()) {
+            // Dummy photographer data (replace with actual service when ready)
+            photographer = getDummyPhotographer(photographerId);
+            totalPrice += photographer.getPrice();
+        }
+
+        model.addAttribute("venue", venue);
+        model.addAttribute("photographer", photographer);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("date", date);
+        model.addAttribute("location", location);
+        model.addAttribute("reservationId", reservationId);
+
+        return "confirm";
     }
 
-    @GetMapping("/confirmation")
-    public String confirmation() {
-        return "confirmation"; // You might want to create a simple confirmation.html page
+    // Temporary dummy method for photographer
+    private Photographer getDummyPhotographer(String id) {
+        // Replace with actual logic when photographer service is ready
+        return new Photographer(id, "Photographer " + id, "/images/photographer.jpg", 1000, "Modern", 4.5, true);
+    }
+
+    // @PostMapping("/order")
+    // public String placeOrder(OrderRequest orderRequest) {
+    //     try {
+    //         orderService.placeOrder(orderRequest);
+    //         return "redirect:/confirmation"; // Redirect to a confirmation page on success
+    //     } catch (RuntimeException e) {
+    //         // Handle reservation failure, e.g., redirect to an error page or show a message
+    //         return "redirect:/error?message=" + e.getMessage();
+    //     }
+    // }
+
+    @PostMapping("/order")
+    public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
+        try {
+            // Process the order (e.g., save to database, handle payment)
+            // orderService.placeOrder(orderRequest);
+
+            Venue venue = null;
+            Photographer photographer = null;
+            int totalPrice = 0;
+
+            // Fetch venue details and confirm reservation if venueId is provided
+            if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
+                venue = venueClient.getVenueById(orderRequest.getVenueId());
+                totalPrice += venue.getPrice();
+                // if (orderRequest.getReservationId() != null && !orderRequest.getReservationId().isEmpty()) {
+                //     venueClient.confirm(orderRequest.getReservationId());
+                // }
+            }
+
+            // Fetch photographer details if photographerId is provided
+            if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
+                // Placeholder: Replace with actual photographer service call when available
+                photographer = getDummyPhotographer(orderRequest.getPhotographerId());
+                totalPrice += photographer.getPrice();
+            }
+
+            // Add attributes to model for complete.html
+            model.addAttribute("venue", venue);
+            model.addAttribute("photographer", photographer);
+            model.addAttribute("totalPrice", totalPrice);
+            model.addAttribute("date", orderRequest.getDate());
+            model.addAttribute("location", orderRequest.getLocation());
+            // model.addAttribute("address", orderRequest.getAddress());
+            // model.addAttribute("paymentDetails", orderRequest.getPaymentDetails());
+
+            return "complete"; // Render complete.html
+        } catch (RuntimeException e) {
+            // Redirect to error page with message
+            return "redirect:/error?message=" + e.getMessage();
+        }
     }
 
     @GetMapping("/error")

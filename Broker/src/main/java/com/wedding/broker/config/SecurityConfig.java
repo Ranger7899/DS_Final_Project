@@ -37,10 +37,13 @@ public class SecurityConfig {
                 //         )
                 // )
                 // .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+
+                // !!!! Uncomment what's above and comment the following to bring back authentication
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Allow all requests without authentication
                 )
                 .csrf().disable(); // Disable CSRF for testing (optional, use with caution)
+                /// !!! TILL HERE
         return http.build();
     }
 

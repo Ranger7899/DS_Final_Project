@@ -33,6 +33,10 @@ public class VenueClient {
         ).getBody();
     }
 
+    public Venue getVenueById(String venueId) {
+        return restTemplate.getForObject(venueApiUrl + "/venues/{id}", Venue.class, venueId);
+    }
+
     public Reservation reserve(String venueId, String date, String location, int timeout) {
         ReserveRequest request = new ReserveRequest(venueId, date, location, timeout);
         // The venue service's /reserve endpoint returns a Reservation object

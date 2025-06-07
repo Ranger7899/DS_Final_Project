@@ -58,4 +58,14 @@ public class VenueController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getVenueById(@PathVariable Long id) {
+        try {
+            Venue venue = venueService.getVenueById(id);
+            return ResponseEntity.ok(venue);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

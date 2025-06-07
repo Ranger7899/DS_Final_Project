@@ -26,6 +26,15 @@ public class VenueService {
         return venueRepository.findAvailableVenues(date, location);
     }
 
+    public Venue getVenueById(Long venueId) {
+        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
+        if (optionalVenue.isPresent()) {
+            return optionalVenue.get();
+        } else {
+            throw new RuntimeException("Venue with ID " + venueId + " not found.");
+        }
+    }
+
     public Reservation reserveVenue(Long venueId, LocalDate date, String location, int timeout) {
         Optional<Venue> optionalVenue = venueRepository.findById(venueId);
 
