@@ -18,4 +18,8 @@ public interface VenueRepository extends JpaRepository<Venue, Long> { // Extend 
     @Query("SELECT v FROM Venue v WHERE v.available = true AND v.location = :location AND v.id NOT IN (" +
             "SELECT r.venueId FROM Reservation r WHERE r.date = :date AND (r.status = 'pending' OR r.status = 'confirmed'))")
     List<Venue> findAvailableVenues(LocalDate date, String location);
+
+    // NEW: Custom query to find all distinct locations of available venues
+    @Query("SELECT DISTINCT v.location FROM Venue v")
+    List<String> findDistinctLocationsOfAvailableVenues();
 }

@@ -16,78 +16,83 @@ import java.util.Optional;
 public class VenueService {
 
     @Autowired
-    private VenueRepository venueRepository;
+    private VenueRepository venueRepository; //
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository; //
 
     public List<Venue> getAvailableVenues(String dateString, String location) {
         LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
-        return venueRepository.findAvailableVenues(date, location);
+        return venueRepository.findAvailableVenues(date, location); //
     }
 
-    public Venue getVenueById(Long venueId) {
-        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
-        if (optionalVenue.isPresent()) {
-            return optionalVenue.get();
+    public Venue getVenueById(Long venueId) { //
+        Optional<Venue> optionalVenue = venueRepository.findById(venueId); //
+        if (optionalVenue.isPresent()) { //
+            return optionalVenue.get(); //
         } else {
-            throw new RuntimeException("Venue with ID " + venueId + " not found.");
+            throw new RuntimeException("Venue with ID " + venueId + " not found."); //
         }
     }
 
-    public Reservation reserveVenue(Long venueId, LocalDate date, String location, int timeout) {
-        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
+    public Reservation reserveVenue(Long venueId, LocalDate date, String location, int timeout) { //
+        Optional<Venue> optionalVenue = venueRepository.findById(venueId); //
 
-        if (optionalVenue.isEmpty()) {
-            throw new RuntimeException("Venue with ID " + venueId + " not found.");
+        if (optionalVenue.isEmpty()) { //
+            throw new RuntimeException("Venue with ID " + venueId + " not found."); //
         }
 
-        Venue venue = optionalVenue.get();
+        Venue venue = optionalVenue.get(); //
 
         // Check if the venue is generally available
-        if (!venue.isAvailable()) {
-            throw new RuntimeException("Venue '" + venue.getName() + "' is not generally available.");
+        if (!venue.isAvailable()) { //
+            throw new RuntimeException("Venue '" + venue.getName() + "' is not generally available."); //
         }
 
         // Check for existing 'pending' or 'confirmed' reservations for this venue on this date
-        List<Reservation> existingReservations = reservationRepository.findByVenueIdAndDateAndStatusIn(
-                venueId, date, Arrays.asList("pending", "confirmed"));
+        List<Reservation> existingReservations = reservationRepository.findByVenueIdAndDateAndStatusIn( //
+                venueId, date, Arrays.asList("pending", "confirmed")); //
 
-        if (!existingReservations.isEmpty()) {
-            throw new RuntimeException("Venue '" + venue.getName() + "' is already reserved for " + date + ".");
+        if (!existingReservations.isEmpty()) { //
+            throw new RuntimeException("Venue '" + venue.getName() + "' is already reserved for " + date + "."); //
         }
 
         // Create a new reservation
-        Reservation reservation = new Reservation(
+        Reservation reservation = new Reservation( //
                 venueId,
                 date,
                 location,
                 "pending" // Initial status
         );
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(reservation); //
     }
 
     public void confirmReservation(Long reservationId) { // Changed ID type to Long
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
-        if (optionalReservation.isPresent()) {
-            Reservation reservation = optionalReservation.get();
-            reservation.setStatus("confirmed");
-            reservationRepository.save(reservation);
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
+        if (optionalReservation.isPresent()) { //
+            Reservation reservation = optionalReservation.get(); //
+            reservation.setStatus("confirmed"); //
+            reservationRepository.save(reservation); //
         } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
         }
     }
 
     public void cancelReservation(Long reservationId) { // Changed ID type to Long
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
-        if (optionalReservation.isPresent()) {
-            Reservation reservation = optionalReservation.get();
-            reservation.setStatus("cancelled");
-            reservationRepository.save(reservation);
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
+        if (optionalReservation.isPresent()) { //
+            Reservation reservation = optionalReservation.get(); //
+            reservation.setStatus("cancelled"); //
+            reservationRepository.save(reservation); //
             // No need to change venue availability here, as venue availability is general, not date-specific.
             // The `findAvailableVenues` method will now implicitly exclude cancelled reservations.
         } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
         }
+    }
+
+    // NEW: Method to get distinct locations
+    public List<String> getAllDistinctLocations() {
+        return venueRepository.findDistinctLocationsOfAvailableVenues();
     }
 }

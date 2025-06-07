@@ -10,6 +10,7 @@ import com.wedding.broker.model.Photographer; // Import Photographer model
 import com.wedding.broker.model.Reservation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +38,12 @@ public class UserController {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    @Value("${venue.service.api.base-url}")
+    private String venueServiceApiBaseUrl;
+
     @GetMapping("/")
-    public String home() {
+    public String home(Model model) {
+        model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
         return "home";
     }
 
