@@ -136,8 +136,7 @@ public class UserController {
         }
 
         if (photographerId != null && !photographerId.isEmpty()) {
-            // Dummy photographer data (replace with actual service when ready)
-            photographer = getDummyPhotographer(photographerId);
+            photographer = photographerClient.getPhotographerById(photographerId);
             totalPrice += photographer.getPrice();
         }
 
