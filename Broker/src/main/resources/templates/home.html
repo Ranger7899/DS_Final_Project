@@ -52,6 +52,18 @@
         <select id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
           <option value="" disabled selected>Loading locations...</option> </select>
       </div>
+      <!-- Temporary Hardcode to Avoid DB Usage -->
+       <!-- <div>
+        <label for="location" class="block text-lg font-medium text-gray-700">Location</label>
+        <select id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+          <option value="" disabled selected>Select a location...</option>
+          <option value="New York">New York</option>
+          <option value="San Francisco">San Francisco</option>
+          <option value="Chicago">Chicago</option>
+          <option value="Los Angeles">Los Angeles</option>
+          <option value="Austin">Austin</option>
+        </select>
+      </div> -->
 
         <div>
           <button type="submit" class="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Find Your Perfect Wedding</button>
@@ -110,6 +122,7 @@ async function fetchLocations() {
   const venueUrl = `${VENUE_API_BASE_URL}/locations`;
   const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`;
 
+  console.log("Photographer URL:", photographerUrl);
   try {
     // Try both fetches individually and catch failures
     const [venueLocations, photographerLocations] = await Promise.all([
@@ -215,6 +228,7 @@ async function fetchAvailableVenues() {
 
 // Fetch locations when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+  // UNCOMMENT LINE BELOW FOR REAL FLOW
   fetchLocations();
   // You can optionally call fetchAvailableVenues() here if you want to initially load venues
   // based on the default date and the first location loaded.
