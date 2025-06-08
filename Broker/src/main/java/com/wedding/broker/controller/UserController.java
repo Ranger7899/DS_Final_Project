@@ -33,6 +33,9 @@ public class UserController {
     @Value("${venue.api.url}") // Inject the value from application.properties
     private String appBaseUrl;
 
+    @Value("${photographer.api.url}") // Inject the value from application.properties
+    private String photographerBaseUrl;
+
     @Autowired // Autowire VenueClient
     private VenueClient venueClient;
 
@@ -60,6 +63,7 @@ public class UserController {
     public String services(@RequestParam String date, @RequestParam String location, Model model) {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
+        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
         // Parse date to LocalDate
         LocalDate parsedDate;
         try {
