@@ -27,6 +27,15 @@ public class PhotographerService {
         return photographerRepository.findAvailablePhotographers(date, location);
     }
 
+    public Photographer getPhotographerById(Long photographerID) { //
+        Optional<Photographer> optionalPhotographer = photographerRepository.findById(photographerID); //
+        if (optionalPhotographer.isPresent()) { //
+            return optionalPhotographer.get(); //
+        } else {
+            throw new RuntimeException("Venue with ID " + photographerID + " not found."); //
+        }
+    }
+
     public Reservation reservePhotographer(Long photoId, LocalDate date, String location, int timeout){
         Optional<Photographer> optionalPhotographer = photographerRepository.findById(photoId);
 
@@ -73,5 +82,10 @@ public class PhotographerService {
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
 
         }
+    }
+
+    // NEW: Method to get distinct locations
+    public List<String> getAllDistinctLocations() {
+        return photographerRepository.findDistinctLocationsOfAvailablePhotographers();
     }
 }

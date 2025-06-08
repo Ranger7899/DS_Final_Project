@@ -52,6 +52,18 @@
         <select id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
           <option value="" disabled selected>Loading locations...</option> </select>
       </div>
+      <!-- Temporary Hardcode to Avoid DB Usage -->
+       <!-- <div>
+        <label for="location" class="block text-lg font-medium text-gray-700">Location</label>
+        <select id="location" name="location" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+          <option value="" disabled selected>Select a location...</option>
+          <option value="New York">New York</option>
+          <option value="San Francisco">San Francisco</option>
+          <option value="Chicago">Chicago</option>
+          <option value="Los Angeles">Los Angeles</option>
+          <option value="Austin">Austin</option>
+        </select>
+      </div> -->
 
         <div>
           <button type="submit" class="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Find Your Perfect Wedding</button>
@@ -97,39 +109,51 @@
 </footer>
 
 <script th:inline="javascript"> // Injected from application.properties via Thymeleaf Controller
-const API_BASE_URL = /*[[${venueServiceApiBaseUrl}]]*/ 'none';
+const VENUE_API_BASE_URL = /*[[${venueServiceApiBaseUrl}]]*/ 'none';
+const PHOTOGRAPHER_API_BASE_URL = /*[[${photographerServiceApiBaseUrl}]]*/ 'none';
+// !!! ADD THE ONE FOR CATERING
 
-// Function to fetch and populate locations dropdown
+// Function to fetch and populate locations dropdown from both venues and photographers
 async function fetchLocations() {
-  const locationDropdown = document.getElementById('location'); // Targeting ID 'location'
-  locationDropdown.innerHTML = '<option value="" disabled selected>Loading locations...</option>'; // Keep disabled selected
+  const locationDropdown = document.getElementById('location');
+  locationDropdown.innerHTML = '<option value="" disabled selected>Loading locations...</option>';
   locationDropdown.disabled = true;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/locations`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const locations = await response.json();
+  const venueUrl = `${VENUE_API_BASE_URL}/locations`;
+  const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`;
 
-    locationDropdown.innerHTML = ''; // Clear loading message
+  console.log("Photographer URL:", photographerUrl);
+  try {
+    // Try both fetches individually and catch failures
+    const [venueLocations, photographerLocations] = await Promise.all([
+      fetch(venueUrl)
+        .then(res => res.ok ? res.json() : [])
+        .catch(() => []),
+      fetch(photographerUrl)
+        .then(res => res.ok ? res.json() : [])
+        .catch(() => [])
+    ]);
+
+    // Combine and deduplicate
+    const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations]));
+
+    locationDropdown.innerHTML = '';
     locationDropdown.disabled = false;
 
-    if (locations.length === 0) {
+    if (allLocations.length === 0) {
       locationDropdown.innerHTML = '<option value="" disabled selected>No locations found</option>';
       locationDropdown.disabled = true;
       return;
     }
 
-    // Add a default "Select a location" option
-    const defaultLocationOption = document.createElement('option');
-    defaultLocationOption.value = "";
-    defaultLocationOption.textContent = "Select a location..."; // Matches original text
-    defaultLocationOption.disabled = true;
-    defaultLocationOption.selected = true;
-    locationDropdown.appendChild(defaultLocationOption);
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = "Select a location...";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    locationDropdown.appendChild(defaultOption);
 
-    locations.forEach(location => {
+    allLocations.forEach(location => {
       const option = document.createElement('option');
       option.value = location;
       option.textContent = location;
@@ -137,13 +161,15 @@ async function fetchLocations() {
     });
 
   } catch (error) {
-    console.error('Error fetching locations:', error);
-    locationDropdown.innerHTML = '<option value="" disabled selected>Error loading locations</option>';
+    console.error('Unexpected error in fetchLocations:', error);
+    locationDropdown.innerHTML = '<option value="" disabled selected>No available locations. Please try again later.</option>';
     locationDropdown.disabled = true;
   }
 }
 
+
 // Function to fetch and populate available venues dropdown
+/*
 async function fetchAvailableVenues() {
   const date = document.getElementById('date').value; // Targeting ID 'date'
   const location = document.getElementById('location').value; // Targeting ID 'location'
@@ -198,18 +224,27 @@ async function fetchAvailableVenues() {
     venuesDropdown.disabled = true; // Keep disabled on error
   }
 }
+*/
 
 // Fetch locations when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+  // UNCOMMENT LINE BELOW FOR REAL FLOW
   fetchLocations();
   // You can optionally call fetchAvailableVenues() here if you want to initially load venues
   // based on the default date and the first location loaded.
   // fetchAvailableVenues();
 });
 
+// Function to make sure it's not possible to pick dates in the past
+document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0]; // Format: "YYYY-MM-DD"
+    dateInput.setAttribute('min', today);
+});
+
 // Add event listeners to fetch venues when location dropdown or date input changes
-document.getElementById('location').addEventListener('change', fetchAvailableVenues); // Targeting ID 'location'
-document.getElementById('date').addEventListener('change', fetchAvailableVenues);     // Targeting ID 'date'
+// document.getElementById('location').addEventListener('change', fetchAvailableVenues); // Targeting ID 'location'
+// document.getElementById('date').addEventListener('change', fetchAvailableVenues);     // Targeting ID 'date'
 </script>
 </body>
 </html>
