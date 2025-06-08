@@ -47,7 +47,7 @@ public class UserController {
     @Value("${venue.service.api.base-url}")
     private String venueServiceApiBaseUrl;
 
-    @Value("${photographer.service.api.base-url}")
+    @Value("${photographer.api.url}")
     private String photographerServiceApiBaseUrl;
 
     @GetMapping("/")
@@ -117,6 +117,9 @@ public class UserController {
                         @RequestParam String date,
                         @RequestParam String location,
                         Model model) {
+
+        model.addAttribute("appBaseUrl", appBaseUrl);
+        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
 
         Venue venue = null;
         Photographer photographer = null;

@@ -173,7 +173,7 @@
                  th:data-price="${photographer.price}" 
                  th:data-id="${photographer.id}" 
                  th:attr="onclick='toggleSelection(this, \'photographer\', \'' + ${photographer.id} + '\', ' + ${photographer.price} + ')'">
-              <img th:src="${photographerBaseUrl} + ${photographer.image}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
+              <img th:src="${photographerBaseUrl} + ${photographer.images}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
               <h4 class="text-xl font-bold text-gray-800" th:text="${photographer.name}"></h4>
               <p class="text-gray-600" th:text="'Price: $' + ${photographer.price}"></p>
               <p class="text-gray-600" th:text="'Style: ' + ${photographer.style}"></p>
