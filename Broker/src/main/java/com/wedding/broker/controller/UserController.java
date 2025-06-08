@@ -41,9 +41,13 @@ public class UserController {
     @Value("${venue.service.api.base-url}")
     private String venueServiceApiBaseUrl;
 
+    @Value("${photographer.service.api.base-url}")
+    private String photographerServiceApiBaseUrl;
+
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
+        model.addAttribute("photographerServiceApiBaseUrl", photographerServiceApiBaseUrl);
         return "home";
     }
 

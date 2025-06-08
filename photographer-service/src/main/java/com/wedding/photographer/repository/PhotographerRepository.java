@@ -12,4 +12,8 @@ public interface PhotographerRepository extends JpaRepository<Photographer, Long
     @Query("SELECT p FROM Photographer p WHERE p.available = true AND p.location = :location AND p.id NOT IN (" +
             "SELECT r.photoId FROM Reservation r WHERE r.date = :date AND (r.status = 'pending' OR r.status = 'confirmed'))")
     List<Photographer> findAvailablePhotographers(LocalDate date, String location);
+
+    // NEW: Custom query to find all distinct locations of available venues
+    @Query("SELECT DISTINCT p.location FROM Photographer p")
+    List<String> findDistinctLocationsOfAvailablePhotographers();
 }
