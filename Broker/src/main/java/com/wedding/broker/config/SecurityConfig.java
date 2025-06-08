@@ -26,23 +26,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // .authorizeHttpRequests(auth -> auth
-                //         .requestMatchers("/", "/home", "/services", "/services/**", "/photographers", "/photographers/**",  "/order", "/images/**", "/css/**", "/js/**").permitAll()
-                //         .requestMatchers("/manager/**").hasRole("MANAGER")
-                //         .anyRequest().authenticated()
-                // )
-                // .oauth2Login(oauth2Login -> oauth2Login
-                //         .userInfoEndpoint(userInfo -> userInfo
-                //                 .userAuthoritiesMapper(userAuthoritiesMapper())
-                //         )
-                // )
-                // .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/home", "/services", "/services/**", "/photographers", "/photographers/**",  "/order", "/images/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userAuthoritiesMapper(userAuthoritiesMapper())
+                        )
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
 
                 // !!!! Uncomment what's above and comment the following to bring back authentication
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Allow all requests without authentication
-                )
-                .csrf().disable(); // Disable CSRF for testing (optional, use with caution)
+//                .authorizeHttpRequests(auth -> auth
+//                        .anyRequest().permitAll() // Allow all requests without authentication
+//                )
+//                .csrf().disable(); // Disable CSRF for testing (optional, use with caution)
                 /// !!! TILL HERE
         return http.build();
     }

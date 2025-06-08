@@ -63,7 +63,7 @@
           <h3 class="text-2xl text-gray-800 mb-4">Selected Venue</h3>
           <div th:if="${venue}">
             <div class="card bg-white p-6 rounded-lg shadow-md">
-              <img th:src="${venue.image}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
+              <img th:src="${venue.images}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
               <h4 class="text-xl font-bold text-gray-800" th:text="${venue.name}"></h4>
               <div class="card-content">
                 <p class="text-gray-600" th:text="'Price: $' + ${venue.price}"></p>
