@@ -30,6 +30,9 @@ public class UserController {
     @Autowired
     private OrderService orderService;
 
+    @Value("${venue.api.url}") // Inject the value from application.properties
+    private String appBaseUrl;
+
     @Autowired // Autowire VenueClient
     private VenueClient venueClient;
 
@@ -44,11 +47,14 @@ public class UserController {
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
+        model.addAttribute("appBaseUrl", appBaseUrl);
         return "home";
     }
 
     @GetMapping("/services")
     public String services(@RequestParam String date, @RequestParam String location, Model model) {
+
+        model.addAttribute("appBaseUrl", appBaseUrl);
         // Parse date to LocalDate
         LocalDate parsedDate;
         try {

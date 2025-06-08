@@ -3,7 +3,7 @@ package com.wedding.broker.model;
 public class Venue {
     private String id;
     private String name;
-    private String image;
+    private String images;
     private int price;
     private String style;
     private int capacity;
@@ -14,7 +14,7 @@ public class Venue {
     public Venue(String id, String name, String image, int price, String style, int capacity, double rating, boolean available) {
         this.id = id;
         this.name = name;
-        this.image = image;
+        this.images = image;
         this.price = price;
         this.style = style;
         this.capacity = capacity;
@@ -25,7 +25,7 @@ public class Venue {
     // Getters
     public String getId() { return id; }
     public String getName() { return name; }
-    public String getImage() { return image; }
+    public String getImages() { return images; }
     public int getPrice() { return price; }
     public String getStyle() { return style; }
     public int getCapacity() { return capacity; }
