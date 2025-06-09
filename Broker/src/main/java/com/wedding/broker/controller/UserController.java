@@ -33,6 +33,9 @@ public class UserController {
     @Value("${venue.api.url}") // Inject the value from application.properties
     private String appBaseUrl;
 
+    @Value("${photographer.api.url}") // Inject the value from application.properties
+    private String photographerBaseUrl;
+
     @Autowired // Autowire VenueClient
     private VenueClient venueClient;
 
@@ -44,7 +47,7 @@ public class UserController {
     @Value("${venue.service.api.base-url}")
     private String venueServiceApiBaseUrl;
 
-    @Value("${photographer.service.api.base-url}")
+    @Value("${photographer.api.url}")
     private String photographerServiceApiBaseUrl;
 
     @GetMapping("/")
@@ -60,6 +63,7 @@ public class UserController {
     public String services(@RequestParam String date, @RequestParam String location, Model model) {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
+        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
         // Parse date to LocalDate
         LocalDate parsedDate;
         try {
@@ -114,6 +118,9 @@ public class UserController {
                         @RequestParam String location,
                         Model model) {
 
+        model.addAttribute("appBaseUrl", appBaseUrl);
+        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
+
         Venue venue = null;
         Photographer photographer = null;
         int totalPrice = 0;
@@ -129,8 +136,7 @@ public class UserController {
         }
 
         if (photographerId != null && !photographerId.isEmpty()) {
-            // Dummy photographer data (replace with actual service when ready)
-            photographer = getDummyPhotographer(photographerId);
+            photographer = photographerClient.getPhotographerById(photographerId);
             totalPrice += photographer.getPrice();
         }
 

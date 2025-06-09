@@ -22,52 +22,52 @@ public class VenueClient {
         this.venueApiUrl = venueApiUrl;
     }
 
-    // public List<Venue> getAvailableVenues(String date, String location) {
-    //     // Use ParameterizedTypeReference to correctly deserialize List<Venue>
-    //     return restTemplate.exchange(
-    //             venueApiUrl + "/venues/available?date={date}&location={location}",
-    //             HttpMethod.GET,
-    //             null,
-    //             new ParameterizedTypeReference<List<Venue>>() {}, // Correctly handle generic list type
-    //             date, location
-    //     ).getBody();
-    // }
+     public List<Venue> getAvailableVenues(String date, String location) {
+         // Use ParameterizedTypeReference to correctly deserialize List<Venue>
+         return restTemplate.exchange(
+                 venueApiUrl + "/venues/available?date={date}&location={location}",
+                 HttpMethod.GET,
+                 null,
+                 new ParameterizedTypeReference<List<Venue>>() {}, // Correctly handle generic list type
+                 date, location
+         ).getBody();
+     }
 
-    // Hardcoded. For testing purposes:
-    public List<Venue> getAvailableVenues(String date, String location) {
-        return List.of(
-            new Venue(
-                "v1",
-                "Sunset Garden",
-                "https://example.com/images/sunset-garden.jpg",
-                4500,
-                "Outdoor",
-                150,
-                4.7,
-                true
-            ),
-            new Venue(
-                "v2",
-                "Elegant Ballroom",
-                "https://example.com/images/elegant-ballroom.jpg",
-                6000,
-                "Indoor",
-                200,
-                4.9,
-                true
-            ),
-            new Venue(
-                "v3",
-                "Lakeside Pavilion",
-                "https://example.com/images/lakeside-pavilion.jpg",
-                5200,
-                "Waterfront",
-                120,
-                4.6,
-                true
-            )
-        );
-    }
+//    // Hardcoded. For testing purposes:
+//    public List<Venue> getAvailableVenues(String date, String location) {
+//        return List.of(
+//            new Venue(
+//                "v1",
+//                "Sunset Garden",
+//                "https://example.com/images/sunset-garden.jpg",
+//                4500,
+//                "Outdoor",
+//                150,
+//                4.7,
+//                true
+//            ),
+//            new Venue(
+//                "v2",
+//                "Elegant Ballroom",
+//                "https://example.com/images/elegant-ballroom.jpg",
+//                6000,
+//                "Indoor",
+//                200,
+//                4.9,
+//                true
+//            ),
+//            new Venue(
+//                "v3",
+//                "Lakeside Pavilion",
+//                "https://example.com/images/lakeside-pavilion.jpg",
+//                5200,
+//                "Waterfront",
+//                120,
+//                4.6,
+//                true
+//            )
+//        );
+//    }
 
 
     public Venue getVenueById(String venueId) {
