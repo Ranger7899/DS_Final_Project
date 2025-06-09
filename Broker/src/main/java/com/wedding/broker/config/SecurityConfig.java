@@ -11,9 +11,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,18 +53,50 @@ public class SecurityConfig {
 
 
     /* 2. Everyone else -> form login */
+    /* 2. Everyone else -> form login */
     @Bean @Order(2)
-    SecurityFilterChain siteChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain siteChain(HttpSecurity http,
+                                  LogoutSuccessHandler oidcAndLocalLogoutSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/", "/home", "/services/**",
-                                "/register", "/images/**", "/css/**", "/js/**")
-                        .permitAll()
+                                "/register", "/images/**", "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated())
-                .formLogin(f -> f.loginPage("/login").permitAll())              // your login.html
-                .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/"));
+                .formLogin(f -> f.loginPage("/login").permitAll())
+                .logout(l -> l
+                        .logoutUrl("/logout")                  // <a href="/logout"> in home.html :contentReference[oaicite:0]{index=0}
+                        .logoutSuccessHandler(oidcAndLocalLogoutSuccessHandler)
+                        .invalidateHttpSession(true)           // kill JSESSIONID
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
         return http.build();
     }
+
+    @Bean
+    LogoutSuccessHandler oidcAndLocalLogoutSuccessHandler(
+            ClientRegistrationRepository registrations) {
+
+        // Handler that knows how to build the Auth0 /v2/logout URL
+        OidcClientInitiatedLogoutSuccessHandler oidc =
+                new OidcClientInitiatedLogoutSuccessHandler(registrations);
+        // Where Auth0 should send the user afterwards
+        oidc.setPostLogoutRedirectUri("{baseUrl}/");
+
+        // Wrap it so we can decide at runtime
+        return (request, response, authentication) -> {
+            if (authentication != null
+                    && authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.oidc.user.OidcUser) {
+                // Manager → full Auth0 logout
+                oidc.onLogoutSuccess(request, response, authentication);
+            } else {
+                // Regular visitor → just kill the local session
+                new org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler() {{
+                    setDefaultTargetUrl("/");
+                }}.onLogoutSuccess(request, response, authentication);
+            }
+        };
+    }
+
 
     @Bean
     public GrantedAuthoritiesMapper userAuthoritiesMapper() {
