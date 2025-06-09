@@ -39,8 +39,6 @@
   <div class="container mx-auto flex justify-between items-center">
     <a th:href="@{/}" class="text-2xl font-bold text-pink-600">Marry Me Maybe</a>
     <div>
-      <a th:href="@{/manager/orders}" sec:authorize="hasRole('MANAGER')" class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">Manage Orders</a>
-
       <span sec:authorize="isAuthenticated()">
           <span class="text-gray-700 px-3 py-2 rounded-md text-sm font-medium" sec:authentication="name"></span>
           <a th:href="@{/logout}" class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
@@ -118,71 +116,62 @@
   <p>© 2025 Marry Me Maybe. All rights reserved.</p>
 </footer>
 
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  // These URLs are injected from your Spring Controller
-  const VENUE_API_BASE_URL = /*[[${venueApiUrl}]]*/ 'none';
-  const PHOTOGRAPHER_API_BASE_URL = /*[[${photographerApiUrl}]]*/ 'none';
+<script th:inline="javascript"> // Injected from application.properties via Thymeleaf Controller
+const VENUE_API_BASE_URL = /*[[${venueServiceApiBaseUrl}]]*/ 'none';
+const PHOTOGRAPHER_API_BASE_URL = /*[[${photographerServiceApiBaseUrl}]]*/ 'none';
+// !!! ADD THE ONE FOR CATERING
 
-  // Function to fetch and populate locations dropdown from both venues and photographers
-  async function fetchLocations() {
-    const locationDropdown = document.getElementById('location');
-    locationDropdown.innerHTML = '<option value="" disabled selected>Loading locations...</option>';
-    locationDropdown.disabled = true;
+// Function to fetch and populate locations dropdown from both venues and photographers
+async function fetchLocations() {
+  const locationDropdown = document.getElementById('location');
+  locationDropdown.innerHTML = '<option value="" disabled selected>Loading locations...</option>';
+  locationDropdown.disabled = true;
 
-    const venueUrl = `${VENUE_API_BASE_URL}/locations`; // Assuming /venues/locations endpoint
-    const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`; // Assuming /photographers/locations endpoint
+  const venueUrl = `${VENUE_API_BASE_URL}/locations`;
+  const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`;
+  try {
+    // Try both fetches individually and catch failures
+    const [venueLocations, photographerLocations] = await Promise.all([
+      fetch(venueUrl)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => []),
+      fetch(photographerUrl)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => [])
+    ]);
 
-    try {
-      const [venueLocations, photographerLocations] = await Promise.all([
-        fetch(venueUrl)
-                .then(res => res.ok ? res.json() : [])
-                .catch(() => []),
-        fetch(photographerUrl)
-                .then(res => res.ok ? res.json() : [])
-                .catch(() => [])
-      ]);
+    // Combine and deduplicate
+    const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations]));
 
-      const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations]));
+    locationDropdown.innerHTML = '';
+    locationDropdown.disabled = false;
 
-      locationDropdown.innerHTML = '';
-      locationDropdown.disabled = false;
-
-      if (allLocations.length === 0) {
-        locationDropdown.innerHTML = '<option value="" disabled selected>No locations found</option>';
-        locationDropdown.disabled = true;
-        return;
-      }
-
-      const defaultOption = document.createElement('option');
-      defaultOption.value = "";
-      defaultOption.textContent = "Select a location...";
-      defaultOption.disabled = true;
-      defaultOption.selected = true;
-      locationDropdown.appendChild(defaultOption);
-
-      allLocations.forEach(location => {
-        const option = document.createElement('option');
-        option.value = location;
-        option.textContent = location;
-        locationDropdown.appendChild(option);
-      });
-
-    } catch (error) {
-      console.error('Unexpected error in fetchLocations:', error);
-      locationDropdown.innerHTML = '<option value="" disabled selected>No available locations. Please try again later.</option>';
+    if (allLocations.length === 0) {
+      locationDropdown.innerHTML = '<option value="" disabled selected>No locations found</option>';
       locationDropdown.disabled = true;
+      return;
     }
-  }
 
-  // Function to make sure it's not possible to pick dates in the past
-  document.addEventListener('DOMContentLoaded', () => {
-    const dateInput = document.getElementById('date');
-    const today = new Date().toISOString().split('T')[0]; // Format: "YYYY-MM-DD"
-    dateInput.setAttribute('min', today);
-    fetchLocations(); // Call fetchLocations when the DOM is ready
-  });
-  /*]]>*/
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = "Select a location...";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    locationDropdown.appendChild(defaultOption);
+
+    allLocations.forEach(location => {
+      const option = document.createElement('option');
+      option.value = location;
+      option.textContent = location;
+      locationDropdown.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error('Unexpected error in fetchLocations:', error);
+    locationDropdown.innerHTML = '<option value="" disabled selected>No available locations. Please try again later.</option>';
+    locationDropdown.disabled = true;
+  }
+}
 </script>
 </body>
 </html>
