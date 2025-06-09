@@ -1,95 +1,70 @@
+// src/main/java/com/wedding/broker/config/SecurityConfig.java
 package com.wedding.broker.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.wedding.broker.service.AuthUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true) // Keep if you might add method security later
 public class SecurityConfig {
+
+    private final AuthUserDetailsService authUserDetailsService;
+
+    public SecurityConfig(AuthUserDetailsService authUserDetailsService) {
+        this.authUserDetailsService = authUserDetailsService;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/services", "/services/**", "/confirm", "/confirm/**", "/photographers", "/photographers/**",  "/order", "/images/**", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/manager/**").hasRole("MANAGER")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/", "/home", "/services", "/services/**", "/confirm", "/confirm/**", "/photographers", "/photographers/**", "/order", "/images/**", "/css/**", "/js/**", "/register", "/login").permitAll() // Publicly accessible pages
+                        .requestMatchers("/manager/orders").hasRole("MANAGER") // Requires MANAGER role - KEEP THIS
+                        .anyRequest().authenticated() // All other requests require authentication
                 )
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userAuthoritiesMapper(userAuthoritiesMapper())
-                        )
+                .formLogin(form -> form
+                        .loginPage("/login") // Custom login page
+                        .defaultSuccessUrl("/home", true) // Redirect to home on successful login
+                        .permitAll()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
-
-                // !!!! Uncomment what's above and comment the following to bring back authentication
-//                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().permitAll() // Allow all requests without authentication
-//                )
-//                .csrf().disable(); // Disable CSRF for testing (optional, use with caution)
-                /// !!! TILL HERE
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/") // Redirect to home on successful logout
+                        .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                                .loginPage("/oauth2/authorization/auth0") // If using Auth0 for external login
+                        // You can re-add GrantedAuthoritiesMapper here if you use OAuth2 and need to map external roles
+                );
+        // .csrf().disable(); // Consider enabling CSRF for production and handling it in forms
         return http.build();
     }
 
     @Bean
-    public GrantedAuthoritiesMapper userAuthoritiesMapper() {
-        final String customRolesClaim = "https://weddingbroker.com/claims/roles";
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-        return (authorities) -> {
-            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-            authorities.forEach(authority -> {
-                if (authority instanceof OidcUserAuthority) {
-                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-                    Map<String, Object> claims = oidcUserAuthority.getAttributes();
-
-                    if (claims.containsKey(customRolesClaim)) {
-                        Object rolesObject = claims.get(customRolesClaim);
-                        if (rolesObject instanceof Collection) {
-                            Collection<String> roles = (Collection<String>) rolesObject;
-                            roles.stream()
-                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-                                    .forEach(mappedAuthorities::add);
-                        }
-                    }
-                    // Corrected: Add the OidcUserAuthority itself to preserve original authorities
-                    mappedAuthorities.add(oidcUserAuthority);
-                } else if (authority instanceof OAuth2UserAuthority) {
-                    OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
-                    Map<String, Object> attributes = oauth2UserAuthority.getAttributes();
-
-                    if (attributes.containsKey("roles")) {
-                        Object rolesAttr = attributes.get("roles");
-                        if (rolesAttr instanceof Collection) {
-                            ((Collection<?>) rolesAttr).stream()
-                                    .filter(String.class::isInstance)
-                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + ((String) role).toUpperCase()))
-                                    .forEach(mappedAuthorities::add);
-                        }
-                    }
-                    // Corrected: Add the OAuth2UserAuthority itself to preserve original authorities
-                    mappedAuthorities.add(oauth2UserAuthority);
-                } else {
-                    mappedAuthorities.add(authority);
-                }
-            });
-            return mappedAuthorities;
-        };
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(authUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 }
