@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/manager")
-@PreAuthorize("hasRole('MANAGER')")
 public class ManagerController {
     @Autowired
     private OrderRepository orderRepository;
