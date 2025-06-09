@@ -29,8 +29,7 @@ public class PhotographerController {
         if (photographers == null || photographers.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content
         }
-
-        return ResponseEntity.ok(photographers); // 200 OK + body
+        return ResponseEntity.ok(photographers); // 200 OK
     }
 
 
@@ -81,8 +80,12 @@ public class PhotographerController {
 
     // NEW: Endpoint to get all distinct locations
     @GetMapping("/locations")
-    public List<String> getAllLocations() {
-        return photographerService.getAllDistinctLocations();
+    public ResponseEntity<List<String>> getAllLocations() {
+        List<String> locations = photographerService.getAllDistinctLocations();
+        if(locations == null || locations.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(locations);
     }
 
 }
