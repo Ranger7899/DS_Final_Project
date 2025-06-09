@@ -20,17 +20,14 @@ public class Reservation {
     private String location;
     private String status; // pending confirmed or cancelled
 
-    //@Column(name = "created_at", )
+    @Column(name = "created", nullable = false, updatable = false )
+    private LocalDateTime created;
 
-    public Reservation(){}
-    public Reservation( Long photoId, LocalDate date, String location, String status){
-        this.photoId = photoId;
-        this.date = date;
-        this.location = location;
-        this.status = status;
+    @PrePersist
+    protected void _onCreateRecord(){
+        this.created = LocalDateTime.now();
     }
-    public Reservation(Long id, Long photoId, LocalDate date, String location, String status){
-        this.id = id;
+    public Reservation( Long photoId, LocalDate date, String location, String status){
         this.photoId = photoId;
         this.date = date;
         this.location = location;
@@ -77,6 +74,8 @@ public class Reservation {
         this.status = status;
     }
 
+    public LocalDateTime getCreated() {return created; }
+
     @Override
     public String toString() {
         return "Reservation{" +
@@ -85,6 +84,7 @@ public class Reservation {
                 ", date=" + date +
                 ", location='" + location + '\'' +
                 ", status='" + status + '\'' +
+                ", created='" + created + '\'' +
                 '}';
     }
 }

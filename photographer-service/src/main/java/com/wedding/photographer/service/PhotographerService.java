@@ -36,7 +36,7 @@ public class PhotographerService {
         }
     }
 
-    public Reservation reservePhotographer(Long photoId, LocalDate date, String location, int timeout){
+    public Reservation reservePhotographer(Long photoId, LocalDate date, String location){
         Optional<Photographer> optionalPhotographer = photographerRepository.findById(photoId);
 
         if(optionalPhotographer.isEmpty()){
