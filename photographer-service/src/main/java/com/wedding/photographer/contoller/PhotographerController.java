@@ -35,6 +35,7 @@ public class PhotographerController {
 
     @PostMapping("/reserve")
     public ResponseEntity<?> reservePhotographers(@RequestBody ReserveRequest request) {
+        //TODO: check if this can cause double booking same for confirm
         try {
             Reservation reservation = photographerService.reservePhotographer(
                     request.getPhotoId(), // Now a Long
@@ -50,6 +51,7 @@ public class PhotographerController {
 
     @PostMapping("/confirm/{id}")
     public ResponseEntity<?> confirmReservation(@PathVariable Long id) { // Changed ID type to Long
+        //TODO: Make sure confirm deletes pending, also for cancel
         try {
             photographerService.confirmReservation(id);
             return ResponseEntity.ok().build();
