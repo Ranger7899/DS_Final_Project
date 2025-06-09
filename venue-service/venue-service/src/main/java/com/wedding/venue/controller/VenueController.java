@@ -20,9 +20,15 @@ public class VenueController {
     private VenueService venueService; //
 
     @GetMapping("/available")
-    public List<Venue> getAvailableVenues(@RequestParam String date, @RequestParam String location) { //
+    public ResponseEntity<List<Venue>>getAvailableVenues(
+            @RequestParam String date,
+            @RequestParam String location) { //
         // Example: /venues/available?date=2025-12-24&location=New%20York
-        return venueService.getAvailableVenues(date, location); //
+        List<Venue> venues = venueService.getAvailableVenues(date, location);
+        if(venues== null || venues.isEmpty()){
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+        return ResponseEntity.ok(venues); // 200 OK
     }
 
     @PostMapping("/reserve")
@@ -72,7 +78,11 @@ public class VenueController {
 
     // NEW: Endpoint to get all distinct locations
     @GetMapping("/locations")
-    public List<String> getAllLocations() {
-        return venueService.getAllDistinctLocations();
+    public ResponseEntity<List<String>> getAllLocations() {
+        List<String> locations = venueService.getAllDistinctLocations();
+        if(locations == null || locations.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(locations);
     }
 }

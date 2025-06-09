@@ -29,13 +29,13 @@ public class PhotographerController {
         if (photographers == null || photographers.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content
         }
-
-        return ResponseEntity.ok(photographers); // 200 OK + body
+        return ResponseEntity.ok(photographers); // 200 OK
     }
 
 
     @PostMapping("/reserve")
     public ResponseEntity<?> reservePhotographers(@RequestBody ReserveRequest request) {
+        //TODO: check if this can cause double booking same for confirm
         try {
             Reservation reservation = photographerService.reservePhotographer(
                     request.getPhotoId(), // Now a Long
@@ -51,6 +51,7 @@ public class PhotographerController {
 
     @PostMapping("/confirm/{id}")
     public ResponseEntity<?> confirmReservation(@PathVariable Long id) { // Changed ID type to Long
+        //TODO: Make sure confirm deletes pending, also for cancel
         try {
             photographerService.confirmReservation(id);
             return ResponseEntity.ok().build();
@@ -81,8 +82,12 @@ public class PhotographerController {
 
     // NEW: Endpoint to get all distinct locations
     @GetMapping("/locations")
-    public List<String> getAllLocations() {
-        return photographerService.getAllDistinctLocations();
+    public ResponseEntity<List<String>> getAllLocations() {
+        List<String> locations = photographerService.getAllDistinctLocations();
+        if(locations == null || locations.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(locations);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.wedding.photographer.model;
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import org.hibernate.annotations.CollectionId;
+
+import java.time.*;
 
 @Entity
 @Table(name = "reservations")
@@ -17,6 +19,8 @@ public class Reservation {
 
     private String location;
     private String status; // pending confirmed or cancelled
+
+    //@Column(name = "created_at", )
 
     public Reservation(){}
     public Reservation( Long photoId, LocalDate date, String location, String status){
