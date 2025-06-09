@@ -121,8 +121,6 @@ async function fetchLocations() {
 
   const venueUrl = `${VENUE_API_BASE_URL}/locations`;
   const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`;
-
-  console.log("Photographer URL:", photographerUrl);
   try {
     // Try both fetches individually and catch failures
     const [venueLocations, photographerLocations] = await Promise.all([
@@ -228,7 +226,6 @@ async function fetchAvailableVenues() {
 
 // Fetch locations when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  // UNCOMMENT LINE BELOW FOR REAL FLOW
   fetchLocations();
   // You can optionally call fetchAvailableVenues() here if you want to initially load venues
   // based on the default date and the first location loaded.

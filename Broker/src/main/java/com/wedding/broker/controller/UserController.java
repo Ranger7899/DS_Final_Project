@@ -124,28 +124,49 @@ public class UserController {
         Venue venue = null;
         Photographer photographer = null;
         int totalPrice = 0;
-        String reservationId = null;
+        // String reservationId = null;
 
         if (venueId != null && !venueId.isEmpty()) {
             // Reserve venue
-            // Reservation reservation = venueClient.reserve(venueId, date, location, 30); // 30-minute timeout
-            // reservationId = reservation.getId();
-            // Fetch venue details (assuming a method to get venue by ID)
-            venue = venueClient.getVenueById(venueId); // Implement this in VenueClient
+            Reservation reservationVenue = venueClient.reserve(venueId, date, location, 30); // 30-minute timeout
+            venue = venueClient.getVenueById(venueId);
             totalPrice += venue.getPrice();
+
+            // Debug log
+            System.out.println("Venue Reserved:");
+            System.out.println("  Reservation ID: " + reservationVenue.getId());
+            System.out.println("  Venue ID: " + venue.getId());
+            System.out.println("  Name: " + venue.getName());
+            System.out.println("  Location: " + location);
+            System.out.println("  Date: " + date);
+            System.out.println("  Price: $" + venue.getPrice());
+            System.out.println("  Timeout: 30 minutes");
         }
 
         if (photographerId != null && !photographerId.isEmpty()) {
+            // Reserve photographer
+            Reservation reservationPhotographer = photographerClient.reserve(photographerId, date, location, 30); // 30-minute timeout
             photographer = photographerClient.getPhotographerById(photographerId);
             totalPrice += photographer.getPrice();
+
+            // Debug log
+            System.out.println("Photographer Reserved:");
+            System.out.println("  Reservation ID: " + reservationPhotographer.getId());
+            System.out.println("  Photographer ID: " + photographer.getId());
+            System.out.println("  Name: " + photographer.getName());
+            System.out.println("  Location: " + location);
+            System.out.println("  Date: " + date);
+            System.out.println("  Price: $" + photographer.getPrice());
+            System.out.println("  Timeout: 30 minutes");
         }
+
 
         model.addAttribute("venue", venue);
         model.addAttribute("photographer", photographer);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("date", date);
         model.addAttribute("location", location);
-        model.addAttribute("reservationId", reservationId);
+        // model.addAttribute("reservationId", reservationId);
 
         return "confirm";
     }
