@@ -52,11 +52,11 @@
     <div>
             <span sec:authorize="isAuthenticated()">
                 <span class="text-gray-700 px-3 py-2 rounded-md text-sm font-medium" sec:authentication="name"></span>
-                <a th:href="@{/logout}"
+                <a href="/logout"
                    class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
             </span>
       <span sec:authorize="!isAuthenticated()">
-                <a th:href="@{/login}"
+                <a href="/login"
                    class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
             </span>
     </div>

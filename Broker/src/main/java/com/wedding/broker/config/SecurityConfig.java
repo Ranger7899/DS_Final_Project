@@ -9,119 +9,82 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final ClientRegistrationRepository clientRegistrationRepository;
-    private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(ClientRegistrationRepository clientRegistrationRepository, UserDetailsService userDetailsService) {
-        this.clientRegistrationRepository = clientRegistrationRepository;
-        this.userDetailsService = userDetailsService;
-    }
-
-    // --- Auth0 Security Filter Chain (for /manager/**) ---
-    // This chain should be processed first for manager paths.
-    @Bean
-    @Order(1) // Higher precedence for manager paths
-    public SecurityFilterChain managerSecurityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("Configuring managerSecurityFilterChain (Auth0) for /manager/** paths.");
+    /* 1. Manager area -> Auth0 only */
+    /* 1. Manager area -> Auth0 only */
+    @Bean @Order(1)
+    SecurityFilterChain managerChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/manager/**") // ONLY apply this chain to paths starting with /manager/
-                .authorizeHttpRequests(auth -> auth
-                        // Ensure manager-specific paths require MANAGER role, others just authenticated
-                        .requestMatchers("/manager/orders").hasRole("MANAGER")
-                        .anyRequest().authenticated() // All other /manager/** paths require authentication via Auth0
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        // Auth0 will handle the login redirect automatically when an unauthenticated /manager/** path is accessed
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userAuthoritiesMapper(this.userAuthoritiesMapper())
-                        )
-                )
-                .logout(logout -> logout
-                        .logoutSuccessHandler(oidcLogoutSuccessHandler())
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/manager/logout")) // Specific logout for Auth0
-                        .permitAll() // Allow logout for /manager/logout
-                );
+                // IMPORTANT: include both the START and the CALLBACK paths
+                .securityMatcher("/manager/**", "/oauth2/**", "/login/oauth2/**")
+
+                .authorizeHttpRequests(a -> a
+                        // let Spring hit these URLs without authentication
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .anyRequest().hasRole("MANAGER"))
+
+                .oauth2Login(o -> o
+                        .loginPage("/oauth2/authorization/auth0"))     // entry-point for this chain
+
+        /* remove this line if you’re not using JWTs in your own APIs */
+        //.oauth2ResourceServer(o -> o.jwt())
+        ;
         return http.build();
     }
 
-    // --- Local Form Login Security Filter Chain (for all other paths) ---
-    // This chain should be processed after the manager chain.
-    @Bean
-    @Order(2) // Lower precedence for all other paths
-    public SecurityFilterChain userSecurityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("Configuring userSecurityFilterChain (Local Form Login) for other paths.");
+
+
+    /* 2. Everyone else -> form login */
+    @Bean @Order(2)
+    SecurityFilterChain siteChain(HttpSecurity http) throws Exception {
         http
-                // This chain implicitly handles all requests NOT matched by the higher-ordered managerSecurityFilterChain
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/", "/home", "/services", "/services/**", "/confirm", "/confirm/**",
-                                "/photographers", "/photographers/**", "/order", "/images/**", "/css/**", "/js/**",
-                                "/login", "/signup", "/register" // These are the public paths for local users
-                        ).permitAll() // Publicly accessible paths (no authentication needed)
-                        .anyRequest().authenticated() // All other paths (not /manager/** and not permitAll above) require local form login
-                )
-                .formLogin(form -> form
-                        .loginPage("/login") // Your custom local login page
-                        .defaultSuccessUrl("/", true) // Redirect to home after successful local login
-                        .permitAll() // Allow access to login page itself
-                )
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // Local logout for general users
-                        .logoutSuccessUrl("/login?logout") // Redirect to login page with logout param
-                        .permitAll() // Allow logout for /logout
-                );
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers("/", "/home", "/services/**",
+                                "/register", "/images/**", "/css/**", "/js/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(f -> f.loginPage("/login").permitAll())              // your login.html
+                .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/"));
         return http.build();
-    }
-
-    // --- Helper Beans ---
-
-    private LogoutSuccessHandler oidcLogoutSuccessHandler() {
-        SimpleUrlLogoutSuccessHandler handler = new SimpleUrlLogoutSuccessHandler();
-        handler.setDefaultTargetUrl("/"); // Redirect to home after Auth0 logout
-        return handler;
     }
 
     @Bean
     public GrantedAuthoritiesMapper userAuthoritiesMapper() {
+        final String customRolesClaim = "https://weddingbroker.com/claims/roles";
+
         return (authorities) -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
             authorities.forEach(authority -> {
                 if (authority instanceof OidcUserAuthority) {
                     OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-                    Map<String, Object> attributes = oidcUserAuthority.getAttributes();
+                    Map<String, Object> claims = oidcUserAuthority.getAttributes();
 
-                    if (attributes.containsKey("roles")) {
-                        Object rolesAttr = attributes.get("roles");
-                        if (rolesAttr instanceof Collection) {
-                            ((Collection<?>) rolesAttr).stream()
-                                    .filter(String.class::isInstance)
-                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + ((String) role).toUpperCase()))
+                    if (claims.containsKey(customRolesClaim)) {
+                        Object rolesObject = claims.get(customRolesClaim);
+                        if (rolesObject instanceof Collection) {
+                            Collection<String> roles = (Collection<String>) rolesObject;
+                            roles.stream()
+                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                                     .forEach(mappedAuthorities::add);
                         }
                     }
+                    // Corrected: Add the OidcUserAuthority itself to preserve original authorities
                     mappedAuthorities.add(oidcUserAuthority);
                 } else if (authority instanceof OAuth2UserAuthority) {
                     OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
@@ -136,6 +99,7 @@ public class SecurityConfig {
                                     .forEach(mappedAuthorities::add);
                         }
                     }
+                    // Corrected: Add the OAuth2UserAuthority itself to preserve original authorities
                     mappedAuthorities.add(oauth2UserAuthority);
                 } else {
                     mappedAuthorities.add(authority);
@@ -145,16 +109,9 @@ public class SecurityConfig {
         };
     }
 
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
     }
 }
