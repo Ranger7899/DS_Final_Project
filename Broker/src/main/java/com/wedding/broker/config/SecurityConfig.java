@@ -35,7 +35,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login") // Custom login page
-                        .defaultSuccessUrl("/home", true) // Redirect to home on successful login
+                        .defaultSuccessUrl("/", true) // Redirect to home on successful login
                         .permitAll()
                 )
                 .logout(logout -> logout
