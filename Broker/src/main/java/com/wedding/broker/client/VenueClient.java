@@ -74,8 +74,8 @@ public class VenueClient {
         return restTemplate.getForObject(venueApiUrl + "/venues/{id}", Venue.class, venueId);
     }
 
-    public Reservation reserve(String venueId, String date, String location, int timeout) {
-        ReserveRequest request = new ReserveRequest(venueId, date, location, timeout);
+    public Reservation reserve(String venueId, String date, String location) {
+        ReserveRequest request = new ReserveRequest(venueId, date, location);
         // The venue service's /reserve endpoint returns a Reservation object
         return restTemplate.postForObject(venueApiUrl + "/venues/reserve", request, Reservation.class);
     }

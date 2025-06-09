@@ -128,7 +128,7 @@ public class UserController {
 
         if (venueId != null && !venueId.isEmpty()) {
             // Reserve venue
-            Reservation reservationVenue = venueClient.reserve(venueId, date, location, 30); // 30-minute timeout
+            Reservation reservationVenue = venueClient.reserve(venueId, date, location);
             venue = venueClient.getVenueById(venueId);
             totalPrice += venue.getPrice();
 
@@ -145,7 +145,7 @@ public class UserController {
 
         if (photographerId != null && !photographerId.isEmpty()) {
             // Reserve photographer
-            Reservation reservationPhotographer = photographerClient.reserve(photographerId, date, location, 30); // 30-minute timeout
+            Reservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
             photographer = photographerClient.getPhotographerById(photographerId);
             totalPrice += photographer.getPrice();
 

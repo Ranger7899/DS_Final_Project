@@ -28,7 +28,7 @@ public class OrderService {
         // Reserve the venue service with a 5-minute timeout
         // The timeout parameter will be sent to the venue service
         Reservation venueReservation = venueClient.reserve(
-                orderRequest.getVenueId(), orderRequest.getDate(), orderRequest.getLocation(), 300);
+                orderRequest.getVenueId(), orderRequest.getDate(), orderRequest.getLocation());
 
         // Check if the reservation succeeded (venueReservation object is not null and has a valid ID)
         if (venueReservation != null && venueReservation.getId() != null) {

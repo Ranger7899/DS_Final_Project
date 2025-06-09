@@ -35,7 +35,7 @@ public class VenueService {
         }
     }
 
-    public Reservation reserveVenue(Long venueId, LocalDate date, String location, int timeout) { //
+    public Reservation reserveVenue(Long venueId, LocalDate date, String location) { //
         Optional<Venue> optionalVenue = venueRepository.findById(venueId); //
 
         if (optionalVenue.isEmpty()) { //

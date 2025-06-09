@@ -17,5 +17,4 @@ public class ReservationScheduledTask {
         LocalDateTime timeoutTime = LocalDateTime.now().minusMinutes(15);
         reservationRepository.deleteOldPendingReservations(timeoutTime);
     }
-
 }

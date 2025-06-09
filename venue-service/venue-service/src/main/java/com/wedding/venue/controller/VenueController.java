@@ -37,8 +37,7 @@ public class VenueController {
             Reservation reservation = venueService.reserveVenue( //
                     request.getVenueId(), // Now a Long
                     request.getDate(),    // Now a LocalDate
-                    request.getLocation(), //
-                    request.getTimeout() //
+                    request.getLocation()
             );
             return ResponseEntity.ok(reservation); //
         } catch (RuntimeException e) {

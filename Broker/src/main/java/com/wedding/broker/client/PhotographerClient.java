@@ -38,8 +38,8 @@ public class PhotographerClient {
         return restTemplate.getForObject(photographerApiUrl + "/photographers/{id}", Photographer.class, photographerId);
     }
 
-    public Reservation reserve(String photographerId, String date, String location, int timeout) {
-        ReserveRequest request = new ReserveRequest(photographerId, date, location, timeout);
+    public Reservation reserve(String photographerId, String date, String location) {
+        ReserveRequest request = new ReserveRequest(photographerId, date, location);
         // The photographer service's /reserve endpoint returns a Reservation object
         return restTemplate.postForObject(photographerApiUrl + "/photographers/reserve", request, Reservation.class);
     }
