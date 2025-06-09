@@ -1,7 +1,6 @@
 package com.wedding.catering.controller;
 
 import com.wedding.catering.model.CateringCompany;
-import com.wedding.catering.model.FoodType;
 import com.wedding.catering.model.Reservation;
 import com.wedding.catering.model.ReserveRequest;
 import com.wedding.catering.service.CateringService;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -44,7 +42,7 @@ public class CateringController {
                     request.getCompanyId(),
                     request.getDate(),
                     request.getLocation(),
-                    request.getFoodTypes()
+                    request.getTimeout()
             );
             return ResponseEntity.ok(reservation); // 200 OK
         } catch (RuntimeException e) {
@@ -72,5 +70,26 @@ public class CateringController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    // Get company by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCateringCompanyById(@PathVariable Long id) {
+        try {
+            CateringCompany company = cateringService.getCateringCompanyById(id);
+            return ResponseEntity.ok(company);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    // Get all distinct locations
+    @GetMapping("/locations")
+    public ResponseEntity<List<String>> getAllLocations() {
+        List<String> locations = cateringService.getAllDistinctLocations();
+        if (locations == null || locations.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(locations);
     }
 }

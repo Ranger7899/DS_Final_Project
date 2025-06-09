@@ -1,7 +1,6 @@
 package com.wedding.catering.service;
 
 import com.wedding.catering.model.CateringCompany;
-import com.wedding.catering.model.FoodType;
 import com.wedding.catering.model.Reservation;
 import com.wedding.catering.repository.CateringCompanyRepository;
 import com.wedding.catering.repository.ReservationRepository;
@@ -22,18 +21,19 @@ public class CateringService {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    // Get available companies for a specific date and location
+    // Fetch companies available for a specific date and location
     public List<CateringCompany> getAvailableCompanies(String dateString, String location) {
         LocalDate date = LocalDate.parse(dateString);
 
-        // Find all companies in the location
         List<CateringCompany> allCompanies = cateringCompanyRepository.findAll();
 
         return allCompanies.stream()
-                .filter(company -> company.getLocation().equalsIgnoreCase(location) && isAvailable(company.getId(), date, company.getMaxEventsPerDay()))
+                .filter(company -> company.getLocation().equalsIgnoreCase(location)
+                        && isAvailable(company.getId(), date, company.getMaxEventsPerDay()))
                 .toList();
     }
 
+    // Check if a company can still accept reservations on a specific date
     private boolean isAvailable(Long companyId, LocalDate date, int maxEvents) {
         List<Reservation> reservations = reservationRepository.findByCateringCompanyIdAndDateAndStatusIn(
                 companyId, date, Arrays.asList("pending", "confirmed")
@@ -41,8 +41,8 @@ public class CateringService {
         return reservations.size() < maxEvents;
     }
 
-    // Make a reservation
-    public Reservation reserveCatering(Long companyId, LocalDate date, String location, List<FoodType> foodTypes) {
+    // Create a reservation
+    public Reservation reserveCatering(Long companyId, LocalDate date, String location, int timeout) {
         Optional<CateringCompany> optionalCompany = cateringCompanyRepository.findById(companyId);
 
         if (optionalCompany.isEmpty()) {
@@ -51,18 +51,15 @@ public class CateringService {
 
         CateringCompany company = optionalCompany.get();
 
-        // Check if company is available for this date
         if (!isAvailable(companyId, date, company.getMaxEventsPerDay())) {
             throw new RuntimeException("Catering company " + company.getName() + " is fully booked for " + date + ".");
         }
 
-        // Create a new reservation
         Reservation reservation = new Reservation(
                 companyId,
                 date,
                 location,
-                "pending", // Start as pending
-                foodTypes
+                "pending"
         );
 
         return reservationRepository.save(reservation);
@@ -70,11 +67,11 @@ public class CateringService {
 
     // Confirm a reservation
     public void confirmReservation(Long reservationId) {
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
-        if (optionalReservation.isPresent()) {
-            Reservation reservation = optionalReservation.get();
-            reservation.setStatus("confirmed");
-            reservationRepository.save(reservation);
+        Optional<Reservation> optional = reservationRepository.findById(reservationId);
+        if (optional.isPresent()) {
+            Reservation r = optional.get();
+            r.setStatus("confirmed");
+            reservationRepository.save(r);
         } else {
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
@@ -82,19 +79,24 @@ public class CateringService {
 
     // Cancel a reservation
     public void cancelReservation(Long reservationId) {
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
-        if (optionalReservation.isPresent()) {
-            Reservation reservation = optionalReservation.get();
-            reservation.setStatus("cancelled");
-            reservationRepository.save(reservation);
+        Optional<Reservation> optional = reservationRepository.findById(reservationId);
+        if (optional.isPresent()) {
+            Reservation r = optional.get();
+            r.setStatus("cancelled");
+            reservationRepository.save(r);
         } else {
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 
-    // Get catering company by ID (if needed by broker later)
-    public CateringCompany getCompanyById(Long companyId) {
+    // Fetch a catering company by ID
+    public CateringCompany getCateringCompanyById(Long companyId) {
         return cateringCompanyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Catering Company with ID " + companyId + " not found."));
+    }
+
+    // List all distinct company locations
+    public List<String> getAllDistinctLocations() {
+        return cateringCompanyRepository.findDistinctLocationsOfAvailableCompanies();
     }
 }

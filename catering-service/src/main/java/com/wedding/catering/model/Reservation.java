@@ -2,7 +2,6 @@ package com.wedding.catering.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "reservations")
@@ -20,23 +19,25 @@ public class Reservation {
 
     private String location;
 
-
-    private String status; // e.g., pending, confirmed, cancelled
-
-    @ElementCollection(targetClass = FoodType.class)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "reservation_foodtypes", joinColumns = @JoinColumn(name = "reservation_id"))
-    @Column(name = "food_type")
-    private List<FoodType> foodTypes;
+    private String status; // "pending", "confirmed", "cancelled"
 
     public Reservation() {}
 
-    public Reservation(Long cateringCompanyId, LocalDate date, String location, String status, List<FoodType> foodTypes) {
+    public Reservation(Long cateringCompanyId, LocalDate date, String location, String status) {
         this.cateringCompanyId = cateringCompanyId;
         this.date = date;
         this.location = location;
         this.status = status;
-        this.foodTypes = foodTypes;
+
+    }
+
+    public Reservation(Long id, Long cateringCompanyId, LocalDate date, String location, String status) {
+        this.id = id;
+        this.cateringCompanyId = cateringCompanyId;
+        this.date = date;
+        this.location = location;
+        this.status = status;
+
     }
 
     public Long getId() {
@@ -59,10 +60,6 @@ public class Reservation {
         return status;
     }
 
-    public List<FoodType> getFoodTypes() {
-        return foodTypes;
-    }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -83,7 +80,15 @@ public class Reservation {
         this.status = status;
     }
 
-    public void setFoodTypes(List<FoodType> foodTypes) {
-        this.foodTypes = foodTypes;
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", cateringCompanyId=" + cateringCompanyId +
+                ", date=" + date +
+                ", location='" + location + '\'' +
+                ", status='" + status + '\'' +
+
+                '}';
     }
 }
