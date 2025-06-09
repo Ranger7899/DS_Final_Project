@@ -1,7 +1,7 @@
 package com.wedding.venue.model;
 
 import jakarta.persistence.*; // Import all necessary JPA annotations
-import java.time.LocalDate; // Import LocalDate for date handling
+import java.time.*; // Import LocalDate for date handling
 
 @Entity // Marks this class as a JPA entity
 @Table(name = "reservations") // Maps this entity to a database table named 'reservations'
@@ -20,20 +20,19 @@ public class Reservation {
     private String location;
     private String status; // e.g., "pending", "confirmed", "cancelled"
 
+    @Column(name = "created", nullable = false, updatable = false )
+    private LocalDateTime created;
+
+    @PrePersist
+    protected void onCreateRecord(){
+        this.created = LocalDateTime.now();
+    }
+
     // Default constructor is required by JPA
     public Reservation() {}
 
     // Constructor for creating new Reservations without an ID
     public Reservation(Long venueId, LocalDate date, String location, String status) {
-        this.venueId = venueId;
-        this.date = date;
-        this.location = location;
-        this.status = status;
-    }
-
-    // Full constructor (useful for fetching from DB)
-    public Reservation(Long id, Long venueId, LocalDate date, String location, String status) {
-        this.id = id;
         this.venueId = venueId;
         this.date = date;
         this.location = location;
@@ -51,6 +50,7 @@ public class Reservation {
     public void setLocation(String location) { this.location = location; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public LocalDateTime getCreated() {return created; }
 
     @Override
     public String toString() {
@@ -60,6 +60,7 @@ public class Reservation {
                 ", date=" + date +
                 ", location='" + location + '\'' +
                 ", status='" + status + '\'' +
+                ", created='" + created + '\'' +
                 '}';
     }
 }

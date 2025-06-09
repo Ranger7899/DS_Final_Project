@@ -6,15 +6,13 @@ public class ReserveRequest {
     private Long venueId; // Changed type to Long
     private LocalDate date; // Changed type to LocalDate
     private String location;
-    private int timeout;
 
     public ReserveRequest() {}
 
-    public ReserveRequest(Long venueId, LocalDate date, String location, int timeout) {
+    public ReserveRequest(Long venueId, LocalDate date, String location) {
         this.venueId = venueId;
         this.date = date;
         this.location = location;
-        this.timeout = timeout;
     }
 
     // Getters and setters
@@ -24,6 +22,4 @@ public class ReserveRequest {
     public void setDate(LocalDate date) { this.date = date; } // Setter accepts LocalDate
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
-    public int getTimeout() { return timeout; }
-    public void setTimeout(int timeout) { this.timeout = timeout; }
 }

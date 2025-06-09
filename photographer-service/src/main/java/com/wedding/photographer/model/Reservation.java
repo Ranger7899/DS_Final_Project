@@ -1,6 +1,5 @@
 package com.wedding.photographer.model;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CollectionId;
 
 import java.time.*;
 
@@ -24,9 +23,11 @@ public class Reservation {
     private LocalDateTime created;
 
     @PrePersist
-    protected void _onCreateRecord(){
+    protected void onCreateRecord(){
         this.created = LocalDateTime.now();
     }
+    public Reservation() {}
+
     public Reservation( Long photoId, LocalDate date, String location, String status){
         this.photoId = photoId;
         this.date = date;
