@@ -36,6 +36,9 @@ public class VenueService {
     }
 
     public Reservation reserveVenue(Long venueId, LocalDate date, String location) { //
+        if(date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
+            throw new RuntimeException("Venue booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
+        }
         Optional<Venue> optionalVenue = venueRepository.findById(venueId); //
 
         if (optionalVenue.isEmpty()) { //

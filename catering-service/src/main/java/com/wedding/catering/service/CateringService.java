@@ -43,6 +43,9 @@ public class CateringService {
 
     // Create a reservation
     public Reservation reserveCatering(Long companyId, LocalDate date, String location) {
+        if(date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
+            throw new RuntimeException("Photographer booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
+        }
         Optional<CateringCompany> optionalCompany = cateringCompanyRepository.findById(companyId);
 
         if (optionalCompany.isEmpty()) {
