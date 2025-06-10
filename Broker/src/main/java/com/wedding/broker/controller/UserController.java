@@ -1,15 +1,13 @@
 // src/main/java/com/wedding/broker/controller/UserController.java
 package com.wedding.broker.controller;
 
-import com.wedding.broker.model.OrderRequest;
+import com.wedding.broker.client.CateringClient;
+import com.wedding.broker.model.*;
 import com.wedding.broker.service.OrderService;
 import com.wedding.broker.client.VenueClient; // Import VenueClient
-import com.wedding.broker.model.Venue; // Import Venue model
 import com.wedding.broker.client.PhotographerClient; // Import PhotographerClient
-import com.wedding.broker.model.Photographer; // Import Photographer model
-import com.wedding.broker.model.PhotographerReservation;
-import com.wedding.broker.model.VenueReservation;
 
+import org.hibernate.cache.spi.support.CollectionReadOnlyAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -38,11 +36,17 @@ public class UserController {
     @Value("${photographer.api.url}") // Inject the value from application.properties
     private String photographerBaseUrl;
 
+    @Value("${catering.api.url}")
+    private String cateringBaseUrl;
+
     @Autowired // Autowire VenueClient
     private VenueClient venueClient;
 
     @Autowired // Autowire PhotographerClient
     private PhotographerClient photographerClient;
+
+    @Autowired
+    private CateringClient cateringClient;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -52,10 +56,14 @@ public class UserController {
     @Value("${photographer.service.api.base-url}")
     private String photographerServiceApiBaseUrl;
 
+    @Value("${catering.service.api.base-url}")
+    private String cateringServiceApiBaseUrl;
+
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
         model.addAttribute("photographerServiceApiBaseUrl", photographerServiceApiBaseUrl);
+        model.addAttribute("cateringServiceApiBaseUrl", cateringServiceApiBaseUrl);
       
         model.addAttribute("appBaseUrl", appBaseUrl);
         return "home";
@@ -66,6 +74,7 @@ public class UserController {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
         model.addAttribute("photographerBaseUrl", photographerBaseUrl);
+        model.addAttribute("cateingBaseUrl", cateringBaseUrl);
         // Parse date to LocalDate
         LocalDate parsedDate;
         try {
@@ -76,12 +85,14 @@ public class UserController {
             model.addAttribute("location", location);
             model.addAttribute("venues", Collections.emptyList());
             model.addAttribute("photographers", Collections.emptyList());
+            model.addAttribute("catering", Collections.emptyList());
             return "services";
         }
 
         // Query suppliers
         List<Venue> venues;
         List<Photographer> photographers;
+        List<Catering> caterings;
         try {
             venues = venueClient.getAvailableVenues(date, location);
         } catch (Exception e) {
@@ -92,12 +103,18 @@ public class UserController {
         } catch (Exception e) {
             photographers = Collections.emptyList();
         }
+        try {
+            caterings = cateringClient.getAvailableCompanies(date, location);
+        }catch (Exception e){
+            caterings = Collections.emptyList();
+        }
 
         // Add attributes to model
         model.addAttribute("date", parsedDate);
         model.addAttribute("location", location);
         model.addAttribute("venues", venues);
         model.addAttribute("photographers", photographers);
+        model.addAttribute("caterings", caterings);
 
         return "services";
     }
@@ -105,15 +122,18 @@ public class UserController {
     @GetMapping("/confirm")
     public String booking(@RequestParam(required = false) String venueId,
                         @RequestParam(required = false) String photographerId,
+                        @RequestParam(required = false) String cateringId,
                         @RequestParam String date,
                         @RequestParam String location,
                         Model model) {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
         model.addAttribute("photographerBaseUrl", photographerBaseUrl);
+        model.addAttribute("cateringBaseUrl", cateringBaseUrl);
 
         Venue venue = null;
         Photographer photographer = null;
+        Catering catering = null;
         int totalPrice = 0;
         // String reservationId = null;
 
@@ -164,9 +184,36 @@ public class UserController {
             System.out.println("Photographer ID is null or empty, skipping reservation.");
         }
 
+        if (cateringId != null && !cateringId.trim().isEmpty()) {
+            try {
+                // Debug input
+                System.out.println("Attempting to reserve catering company with ID: " + photographerId);
+                // Reserve
+                CateringReservation reservationCatering = cateringClient.reserve(photographerId, date, location);
+                catering = cateringClient.getCateringCompanyById(photographerId);
+                totalPrice += catering.getPrice();
+
+                // Debug log
+                System.out.println("Photographer Reserved:");
+                System.out.println("  Reservation ID: " + reservationCatering.getId());
+                System.out.println("  Photographer ID: " + catering.getId());
+                System.out.println("  Name: " + catering.getName());
+                System.out.println("  Location: " + location);
+                System.out.println("  Date: " + date);
+                System.out.println("  Price: $" + catering.getPrice());
+                System.out.println("  Timeout: 30 minutes");
+            } catch (HttpClientErrorException e) {
+                model.addAttribute("error", "Failed to reserve catering company: " + e.getMessage());
+                return "error"; // Redirect to an error page or handle accordingly
+            }
+        } else {
+            System.out.println("Catering ID is null or empty, skipping reservation.");
+        }
+
 
         model.addAttribute("venue", venue);
         model.addAttribute("photographer", photographer);
+        model.addAttribute("catering", catering);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("date", date);
         model.addAttribute("location", location);
@@ -183,6 +230,7 @@ public class UserController {
 
             Venue venue = null;
             Photographer photographer = null;
+            Catering catering = null;
             int totalPrice = 0;
 
             // Fetch venue details and confirm reservation if venueId is provided
@@ -204,6 +252,7 @@ public class UserController {
             // Add attributes to model for complete.html
             model.addAttribute("venue", venue);
             model.addAttribute("photographer", photographer);
+            model.addAttribute("catering", catering);
             model.addAttribute("totalPrice", totalPrice);
             model.addAttribute("date", orderRequest.getDate());
             model.addAttribute("location", orderRequest.getLocation());
