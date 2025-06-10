@@ -47,7 +47,7 @@ public class UserController {
     @Value("${venue.service.api.base-url}")
     private String venueServiceApiBaseUrl;
 
-    @Value("${photographer.api.url}")
+    @Value("${photographer.service.api.base-url}")
     private String photographerServiceApiBaseUrl;
 
     @GetMapping("/")
