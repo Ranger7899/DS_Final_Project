@@ -47,7 +47,7 @@ public class UserController {
     @Value("${venue.service.api.base-url}")
     private String venueServiceApiBaseUrl;
 
-    @Value("${photographer.api.url}")
+    @Value("${photographer.service.api.base-url}")
     private String photographerServiceApiBaseUrl;
 
     @GetMapping("/")
@@ -99,17 +99,6 @@ public class UserController {
 
         return "services";
     }
-
-    // @GetMapping("/services")
-    // public String services(@RequestParam String date, @RequestParam String location, Model model) {
-    //     // Query venue service for available venues
-    //     List<Venue> availableVenues = venueClient.getAvailableVenues(date, location);
-
-    //     model.addAttribute("date", date);
-    //     model.addAttribute("location", location);
-    //     model.addAttribute("venues", availableVenues); // Add available venues to the model
-    //     return "services";
-    // }
 
     @GetMapping("/confirm")
     public String booking(@RequestParam(required = false) String venueId,
@@ -170,23 +159,6 @@ public class UserController {
 
         return "confirm";
     }
-
-    // Temporary dummy method for photographer
-    private Photographer getDummyPhotographer(String id) {
-        // Replace with actual logic when photographer service is ready
-        return new Photographer(id, "Photographer " + id, "/images/photographer.jpg", 1000, "Modern", 4.5, true);
-    }
-
-    // @PostMapping("/order")
-    // public String placeOrder(OrderRequest orderRequest) {
-    //     try {
-    //         orderService.placeOrder(orderRequest);
-    //         return "redirect:/confirmation"; // Redirect to a confirmation page on success
-    //     } catch (RuntimeException e) {
-    //         // Handle reservation failure, e.g., redirect to an error page or show a message
-    //         return "redirect:/error?message=" + e.getMessage();
-    //     }
-    // }
 
     @PostMapping("/order")
     public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
