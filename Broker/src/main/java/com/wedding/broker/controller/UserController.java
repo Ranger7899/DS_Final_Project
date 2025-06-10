@@ -123,7 +123,6 @@ public class UserController {
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
-
                 // Debug log
                 System.out.println("Venue Reserved:");
                 System.out.println("  Reservation ID: " + reservationVenue.getId());
