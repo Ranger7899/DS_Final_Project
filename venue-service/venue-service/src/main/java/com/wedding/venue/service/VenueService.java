@@ -23,6 +23,9 @@ public class VenueService {
 
     public List<Venue> getAvailableVenues(String dateString, String location) {
         LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
+        if (date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
+            throw new RuntimeException("Venue booking date: " + date + " is after or 2years before today: " + LocalDate.now());
+        }
         return venueRepository.findAvailableVenues(date, location); //
     }
 
@@ -36,6 +39,9 @@ public class VenueService {
     }
 
     public Reservation reserveVenue(Long venueId, LocalDate date, String location) { //
+        if(date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
+            throw new RuntimeException("Venue booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
+        }
         Optional<Venue> optionalVenue = venueRepository.findById(venueId); //
 
         if (optionalVenue.isEmpty()) { //
@@ -64,30 +70,46 @@ public class VenueService {
                 location,
                 "pending" // Initial status
         );
-        return reservationRepository.save(reservation); //
+        Reservation result;
+        try {
+            result = reservationRepository.save(reservation);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to make pending reservation in database.", e);
+        }
+        return result;
     }
 
     public void confirmReservation(Long reservationId) { // Changed ID type to Long
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
-        if (optionalReservation.isPresent()) { //
-            Reservation reservation = optionalReservation.get(); //
-            reservation.setStatus("confirmed"); //
-            reservationRepository.save(reservation); //
-        } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
+        if(optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            if("pending".equalsIgnoreCase(reservation.getStatus())){
+                try{
+                    reservation.setStatus("confirmed");
+                    reservationRepository.save(reservation);
+                } catch (Exception e){
+                    throw new RuntimeException("Failed to confirm reservation in database.", e);
+                }
+            }else{
+                throw new RuntimeException("Reservation with ID " + reservationId + " is not in a pending state.");
+            }
+        }else{
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 
     public void cancelReservation(Long reservationId) { // Changed ID type to Long
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
-        if (optionalReservation.isPresent()) { //
-            Reservation reservation = optionalReservation.get(); //
-            reservation.setStatus("cancelled"); //
-            reservationRepository.save(reservation); //
-            // No need to change venue availability here, as venue availability is general, not date-specific.
-            // The `findAvailableVenues` method will now implicitly exclude cancelled reservations.
-        } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+        if (optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            try{
+                reservation.setStatus("cancelled");
+                reservationRepository.save(reservation);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to cancel reservation in database.", e);
+            }
+        }else{
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 

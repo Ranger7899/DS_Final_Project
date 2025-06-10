@@ -23,8 +23,10 @@ public class CateringService {
 
     // Fetch companies available for a specific date and location
     public List<CateringCompany> getAvailableCompanies(String dateString, String location) {
-        LocalDate date = LocalDate.parse(dateString);
-
+        LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
+        if (date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
+            throw new RuntimeException("Venue booking date: " + date + " is after or 2years before today: " + LocalDate.now());
+        }
         List<CateringCompany> allCompanies = cateringCompanyRepository.findAll();
 
         return allCompanies.stream()
@@ -37,12 +39,15 @@ public class CateringService {
     private boolean isAvailable(Long companyId, LocalDate date, int maxEvents) {
         List<Reservation> reservations = reservationRepository.findByCateringCompanyIdAndDateAndStatusIn(
                 companyId, date, Arrays.asList("pending", "confirmed")
-        );
+        ); //TODO: change this to a count query
         return reservations.size() < maxEvents;
     }
 
     // Create a reservation
-    public Reservation reserveCatering(Long companyId, LocalDate date, String location, int timeout) {
+    public Reservation reserveCatering(Long companyId, LocalDate date, String location) {
+        if(date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
+            throw new RuntimeException("Photographer booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
+        }
         Optional<CateringCompany> optionalCompany = cateringCompanyRepository.findById(companyId);
 
         if (optionalCompany.isEmpty()) {
@@ -62,29 +67,47 @@ public class CateringService {
                 "pending"
         );
 
-        return reservationRepository.save(reservation);
+        Reservation result;
+        try {
+            result = reservationRepository.save(reservation);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to make pending reservation in database.", e);
+        }
+        return result;
     }
 
     // Confirm a reservation
     public void confirmReservation(Long reservationId) {
-        Optional<Reservation> optional = reservationRepository.findById(reservationId);
-        if (optional.isPresent()) {
-            Reservation r = optional.get();
-            r.setStatus("confirmed");
-            reservationRepository.save(r);
-        } else {
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+        if(optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            if("pending".equalsIgnoreCase(reservation.getStatus())){
+                try{
+                    reservation.setStatus("confirmed");
+                    reservationRepository.save(reservation);
+                } catch (Exception e){
+                    throw new RuntimeException("Failed to confirm reservation in database.", e);
+                }
+            }else{
+                throw new RuntimeException("Reservation with ID " + reservationId + " is not in a pending state.");
+            }
+        }else{
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 
     // Cancel a reservation
     public void cancelReservation(Long reservationId) {
-        Optional<Reservation> optional = reservationRepository.findById(reservationId);
-        if (optional.isPresent()) {
-            Reservation r = optional.get();
-            r.setStatus("cancelled");
-            reservationRepository.save(r);
-        } else {
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+        if (optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            try{
+                reservation.setStatus("cancelled");
+                reservationRepository.save(reservation);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to cancel reservation in database.", e);
+            }
+        }else{
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
