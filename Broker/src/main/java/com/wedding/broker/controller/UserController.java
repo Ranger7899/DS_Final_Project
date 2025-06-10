@@ -160,48 +160,6 @@ public class UserController {
         return "confirm";
     }
 
-    @PostMapping("/order")
-    public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
-        try {
-            // Process the order (e.g., save to database, handle payment)
-            // orderService.placeOrder(orderRequest);
-
-            Venue venue = null;
-            Photographer photographer = null;
-            int totalPrice = 0;
-
-            // Fetch venue details and confirm reservation if venueId is provided
-            if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
-                venue = venueClient.getVenueById(orderRequest.getVenueId());
-                totalPrice += venue.getPrice();
-                // if (orderRequest.getReservationId() != null && !orderRequest.getReservationId().isEmpty()) {
-                //     venueClient.confirm(orderRequest.getReservationId());
-                // }
-            }
-
-            // Fetch photographer details if photographerId is provided
-            if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
-                // Placeholder: Replace with actual photographer service call when available
-                photographer = getDummyPhotographer(orderRequest.getPhotographerId());
-                totalPrice += photographer.getPrice();
-            }
-
-            // Add attributes to model for complete.html
-            model.addAttribute("venue", venue);
-            model.addAttribute("photographer", photographer);
-            model.addAttribute("totalPrice", totalPrice);
-            model.addAttribute("date", orderRequest.getDate());
-            model.addAttribute("location", orderRequest.getLocation());
-            // model.addAttribute("address", orderRequest.getAddress());
-            // model.addAttribute("paymentDetails", orderRequest.getPaymentDetails());
-
-            return "complete"; // Render complete.html
-        } catch (RuntimeException e) {
-            // Redirect to error page with message
-            return "redirect:/error?message=" + e.getMessage();
-        }
-    }
-
     @GetMapping("/error")
     public String error(@RequestParam(required = false) String message, Model model) {
         model.addAttribute("errorMessage", message != null ? message : "An unknown error occurred.");
