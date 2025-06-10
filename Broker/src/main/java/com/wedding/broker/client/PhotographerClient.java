@@ -1,8 +1,10 @@
 package com.wedding.broker.client;
 
 import com.wedding.broker.model.Photographer;
-import com.wedding.broker.model.Reservation;
-import com.wedding.broker.model.ReserveRequest;
+import com.wedding.broker.model.PhotographerReservation;
+import com.wedding.broker.model.PhotographerReserveRequest;
+import com.wedding.broker.model.VenueReservation;
+import com.wedding.broker.model.VenueReserveRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -38,10 +40,10 @@ public class PhotographerClient {
         return restTemplate.getForObject(photographerApiUrl + "/photographers/{id}", Photographer.class, photographerId);
     }
 
-    public Reservation reserve(String photographerId, String date, String location, int timeout) {
-        ReserveRequest request = new ReserveRequest(photographerId, date, location, timeout);
+    public PhotographerReservation reserve(String photographerId, String date, String location, int timeout) {
+        PhotographerReserveRequest request = new PhotographerReserveRequest(photographerId, date, location, timeout);
         // The photographer service's /reserve endpoint returns a Reservation object
-        return restTemplate.postForObject(photographerApiUrl + "/photographers/reserve", request, Reservation.class);
+        return restTemplate.postForObject(photographerApiUrl + "/photographers/reserve", request, PhotographerReservation.class);
     }
 
     public void confirm(String reservationId) {

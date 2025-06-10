@@ -4,7 +4,7 @@ package com.wedding.broker.service;
 import com.wedding.broker.client.VenueClient;
 import com.wedding.broker.model.Order;
 import com.wedding.broker.model.OrderRequest;
-import com.wedding.broker.model.Reservation; // Ensure this imports the updated broker Reservation model
+import com.wedding.broker.model.VenueReservation; // Ensure this imports the updated broker Reservation model
 import com.wedding.broker.model.OrderServiceReservation;
 import com.wedding.broker.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class OrderService {
 
         // Reserve the venue service with a 5-minute timeout
         // The timeout parameter will be sent to the venue service
-        Reservation venueReservation = venueClient.reserve(
+        VenueReservation venueReservation = venueClient.reserve(
                 orderRequest.getVenueId(), orderRequest.getDate(), orderRequest.getLocation(), 300);
 
         // Check if the reservation succeeded (venueReservation object is not null and has a valid ID)

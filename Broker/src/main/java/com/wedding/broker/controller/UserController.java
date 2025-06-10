@@ -7,7 +7,8 @@ import com.wedding.broker.client.VenueClient; // Import VenueClient
 import com.wedding.broker.model.Venue; // Import Venue model
 import com.wedding.broker.client.PhotographerClient; // Import PhotographerClient
 import com.wedding.broker.model.Photographer; // Import Photographer model
-import com.wedding.broker.model.Reservation;
+import com.wedding.broker.model.PhotographerReservation;
+import com.wedding.broker.model.VenueReservation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -115,38 +117,52 @@ public class UserController {
         int totalPrice = 0;
         // String reservationId = null;
 
-        if (venueId != null && !venueId.isEmpty()) {
-            // Reserve venue
-            Reservation reservationVenue = venueClient.reserve(venueId, date, location, 30); // 30-minute timeout
-            venue = venueClient.getVenueById(venueId);
-            totalPrice += venue.getPrice();
+        if (venueId != null && !venueId.trim().isEmpty()) {
+            try {
+                // Reserve venue
+                VenueReservation reservationVenue = venueClient.reserve(venueId, date, location, 30);
+                venue = venueClient.getVenueById(venueId);
+                totalPrice += venue.getPrice();
 
-            // Debug log
-            System.out.println("Venue Reserved:");
-            System.out.println("  Reservation ID: " + reservationVenue.getId());
-            System.out.println("  Venue ID: " + venue.getId());
-            System.out.println("  Name: " + venue.getName());
-            System.out.println("  Location: " + location);
-            System.out.println("  Date: " + date);
-            System.out.println("  Price: $" + venue.getPrice());
-            System.out.println("  Timeout: 30 minutes");
+                // Debug log
+                System.out.println("Venue Reserved:");
+                System.out.println("  Reservation ID: " + reservationVenue.getId());
+                System.out.println("  Venue ID: " + venue.getId());
+                System.out.println("  Name: " + venue.getName());
+                System.out.println("  Location: " + location);
+                System.out.println("  Date: " + date);
+                System.out.println("  Price: $" + venue.getPrice());
+                System.out.println("  Timeout: 30 minutes");
+            } catch (HttpClientErrorException e) {
+                model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
+                return "error"; // Redirect to an error page or handle accordingly
+            }
         }
 
-        if (photographerId != null && !photographerId.isEmpty()) {
-            // Reserve photographer
-            Reservation reservationPhotographer = photographerClient.reserve(photographerId, date, location, 30); // 30-minute timeout
-            photographer = photographerClient.getPhotographerById(photographerId);
-            totalPrice += photographer.getPrice();
+        if (photographerId != null && !photographerId.trim().isEmpty()) {
+            try {
+                // Debug input
+                System.out.println("Attempting to reserve photographer with ID: " + photographerId);
+                // Reserve photographer
+                PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location, 30);
+                photographer = photographerClient.getPhotographerById(photographerId);
+                totalPrice += photographer.getPrice();
 
-            // Debug log
-            System.out.println("Photographer Reserved:");
-            System.out.println("  Reservation ID: " + reservationPhotographer.getId());
-            System.out.println("  Photographer ID: " + photographer.getId());
-            System.out.println("  Name: " + photographer.getName());
-            System.out.println("  Location: " + location);
-            System.out.println("  Date: " + date);
-            System.out.println("  Price: $" + photographer.getPrice());
-            System.out.println("  Timeout: 30 minutes");
+                // Debug log
+                System.out.println("Photographer Reserved:");
+                System.out.println("  Reservation ID: " + reservationPhotographer.getId());
+                System.out.println("  Photographer ID: " + photographer.getId());
+                System.out.println("  Name: " + photographer.getName());
+                System.out.println("  Location: " + location);
+                System.out.println("  Date: " + date);
+                System.out.println("  Price: $" + photographer.getPrice());
+                System.out.println("  Timeout: 30 minutes");
+            } catch (HttpClientErrorException e) {
+                model.addAttribute("error", "Failed to reserve photographer: " + e.getMessage());
+                return "error"; // Redirect to an error page or handle accordingly
+            }
+        } else {
+            System.out.println("Photographer ID is null or empty, skipping reservation.");
         }
 
 

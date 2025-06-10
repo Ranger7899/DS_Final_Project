@@ -1,8 +1,8 @@
 // src/main/java/com/wedding/broker/client/VenueClient.java
 package com.wedding.broker.client;
 
-import com.wedding.broker.model.Reservation;
-import com.wedding.broker.model.ReserveRequest; // Keep this as is, it's consistent
+import com.wedding.broker.model.VenueReservation;
+import com.wedding.broker.model.VenueReserveRequest; // Keep this as is, it's consistent
 import com.wedding.broker.model.Venue; // Ensure this imports the updated broker Venue model
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference; // Import this
@@ -74,10 +74,10 @@ public class VenueClient {
         return restTemplate.getForObject(venueApiUrl + "/venues/{id}", Venue.class, venueId);
     }
 
-    public Reservation reserve(String venueId, String date, String location, int timeout) {
-        ReserveRequest request = new ReserveRequest(venueId, date, location, timeout);
+    public VenueReservation reserve(String venueId, String date, String location, int timeout) {
+        VenueReserveRequest request = new VenueReserveRequest(venueId, date, location, timeout);
         // The venue service's /reserve endpoint returns a Reservation object
-        return restTemplate.postForObject(venueApiUrl + "/venues/reserve", request, Reservation.class);
+        return restTemplate.postForObject(venueApiUrl + "/venues/reserve", request, VenueReservation.class);
     }
 
     public void confirm(String reservationId) {
