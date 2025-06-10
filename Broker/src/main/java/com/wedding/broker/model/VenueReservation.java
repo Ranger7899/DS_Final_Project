@@ -1,17 +1,17 @@
 // src/main/java/com/wedding/broker/model/Reservation.java
 package com.wedding.broker.model;
 
-public class Reservation {
+public class VenueReservation {
     private String id;
     private String venueId; // Corresponds to venueId in venue service
     private String date; // Corresponds to date in venue service (as String)
     private String location; // Corresponds to location in venue service
     private String status; // Corresponds to status in venue service (e.g., "pending", "confirmed")
 
-    public Reservation() {
+    public VenueReservation() {
     }
 
-    public Reservation(String id, String venueId, String date, String location, String status) {
+    public VenueReservation(String id, String venueId, String date, String location, String status) {
         this.id = id;
         this.venueId = venueId;
         this.date = date;

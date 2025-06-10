@@ -1,23 +1,23 @@
 package com.wedding.broker.model;
 
-public class ReserveRequest {
-    private String venueId;
+public class PhotographerReserveRequest {
+    private String photoId;
     private String date;
     private String location;
     private int timeout;
 
-    public ReserveRequest() {}
+    public PhotographerReserveRequest() {}
 
-    public ReserveRequest(String venueId, String date, String location, int timeout) {
-        this.venueId = venueId;
+    public PhotographerReserveRequest(String photoId, String date, String location, int timeout) {
+        this.photoId = photoId;
         this.date = date;
         this.location = location;
         this.timeout = timeout;
     }
 
     // Getters and setters
-    public String getVenueId() { return venueId; }
-    public void setVenueId(String venueId) { this.venueId = venueId; }
+    public String getPhotoId() { return photoId; }
+    public void setPhotoId(String photoId) { this.photoId = photoId; }
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
     public String getLocation() { return location; }
