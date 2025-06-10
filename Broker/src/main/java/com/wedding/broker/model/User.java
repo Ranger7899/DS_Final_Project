@@ -2,10 +2,12 @@
 package com.wedding.broker.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime; // Import LocalDateTime
 
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,13 +21,23 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    private boolean enabled;
+
+    private String verificationCode;
+
+    private LocalDateTime verificationCodeExpiry; // New field for verification code expiry
+
+    // Default constructor is required by JPA
     public User() {
     }
 
+    // Constructor for creating new User objects (without ID, enabled, verificationCode, verificationCodeExpiry initially)
     public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.enabled = false; // By default, user is not enabled until email is verified
     }
 
     // Getters and Setters
@@ -59,5 +71,29 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public LocalDateTime getVerificationCodeExpiry() { // New getter
+        return verificationCodeExpiry;
+    }
+
+    public void setVerificationCodeExpiry(LocalDateTime verificationCodeExpiry) { // New setter
+        this.verificationCodeExpiry = verificationCodeExpiry;
     }
 }

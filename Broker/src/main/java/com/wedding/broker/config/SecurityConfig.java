@@ -1,14 +1,24 @@
 package com.wedding.broker.config;
 
+import com.wedding.broker.model.User;
+import com.wedding.broker.repository.UserRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.BadCredentialsException; // Import this
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
@@ -16,8 +26,11 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,7 +41,17 @@ import java.util.stream.Collectors;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    /* 1. Manager area -> Auth0 only */
+    private final ClientRegistrationRepository clientRegistrationRepository; // Field for clientRegistrationRepository
+    private final UserRepository userRepository; // Inject UserRepository to use in custom UserDetailsService
+
+
+    // ADDED CONSTRUCTOR for injecting dependencies
+    public SecurityConfig(ClientRegistrationRepository clientRegistrationRepository,
+                          UserRepository userRepository) {
+        this.clientRegistrationRepository = clientRegistrationRepository;
+        this.userRepository = userRepository;
+    }
+
     /* 1. Manager area -> Auth0 only */
     @Bean @Order(1)
     SecurityFilterChain managerChain(HttpSecurity http) throws Exception {
@@ -53,18 +76,18 @@ public class SecurityConfig {
 
 
     /* 2. Everyone else -> form login */
-    /* 2. Everyone else -> form login */
     @Bean @Order(2)
     SecurityFilterChain siteChain(HttpSecurity http,
                                   LogoutSuccessHandler oidcAndLocalLogoutSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/", "/home", "/confirm","/error","/confirm/**","/complete","/order","/order/**","/services/**",
-                                "/register", "/images/**", "/css/**", "/js/**").permitAll()
+                                "/register", "/images/**","/verify-email","/verify-email/**" ,"/css/**", "/js/**",
+                                "/login**").permitAll() // Keep this to ensure /login with params is accessible
                         .anyRequest().authenticated())
-                .formLogin(f -> f.loginPage("/login").permitAll())
+                .formLogin(f -> f.loginPage("/login").permitAll().failureHandler(authenticationFailureHandler()))
                 .logout(l -> l
-                        .logoutUrl("/logout")                  // <a href="/logout"> in home.html :contentReference[oaicite:0]{index=0}
+                        .logoutUrl("/logout")                  // <a href="/logout"> in home.html
                         .logoutSuccessHandler(oidcAndLocalLogoutSuccessHandler)
                         .invalidateHttpSession(true)           // kill JSESSIONID
                         .deleteCookies("JSESSIONID")
@@ -93,6 +116,36 @@ public class SecurityConfig {
                 new org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler() {{
                     setDefaultTargetUrl("/");
                 }}.onLogoutSuccess(request, response, authentication);
+            }
+        };
+    }
+
+    // Custom AuthenticationFailureHandler to provide specific messages
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new SimpleUrlAuthenticationFailureHandler() {
+            @Override
+            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+                                                AuthenticationException exception) throws IOException, ServletException {
+                String errorMessage = "Login failed. Please check your username and password."; // Default generic message
+
+                // Check the cause of the exception for more specific messages
+                Throwable cause = exception.getCause();
+
+                if (cause instanceof UsernameNotFoundException) {
+                    errorMessage = "No account found with that username.";
+                } else if (cause instanceof DisabledException) {
+                    errorMessage = "Account is not enabled. Please verify your email.";
+                } else if (exception instanceof BadCredentialsException) {
+                    // This catches general bad credentials if no more specific cause is found
+                    errorMessage = "Invalid username or password.";
+                }
+                // You can add more specific messages for other exceptions if needed
+                // e.g., else if (cause instanceof LockedException) { ... }
+
+                // Redirect back to login page with the specific error message as a query parameter
+                super.setDefaultFailureUrl("/login?error=" + errorMessage);
+                super.onAuthenticationFailure(request, response, exception);
             }
         };
     }
@@ -143,7 +196,6 @@ public class SecurityConfig {
             return mappedAuthorities;
         };
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
