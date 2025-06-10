@@ -59,7 +59,7 @@ public class SecurityConfig {
                                   LogoutSuccessHandler oidcAndLocalLogoutSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers("/", "/home", "/confirm","/error","/confirm/**","/complete","/services/**",
+                        .requestMatchers("/", "/home", "/confirm","/error","/confirm/**","/complete","/order","/order/**","/services/**",
                                 "/register", "/images/**", "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(f -> f.loginPage("/login").permitAll())
