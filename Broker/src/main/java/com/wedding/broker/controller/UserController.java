@@ -160,6 +160,7 @@ public class UserController {
         return "confirm";
     }
 
+<<<<<<< HEAD
     @PostMapping("/order")
     public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
         try {
@@ -202,6 +203,8 @@ public class UserController {
         }
     }
 
+=======
+>>>>>>> bbe093437bfab542f1512d7543c6effed8474850
     @GetMapping("/error")
     public String error(@RequestParam(required = false) String message, Model model) {
         model.addAttribute("errorMessage", message != null ? message : "An unknown error occurred.");
