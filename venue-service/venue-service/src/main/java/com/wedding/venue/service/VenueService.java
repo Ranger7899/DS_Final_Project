@@ -23,6 +23,9 @@ public class VenueService {
 
     public List<Venue> getAvailableVenues(String dateString, String location) {
         LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
+        if (date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
+            throw new RuntimeException("Venue booking date: " + date + " is after or 2years before today: " + LocalDate.now());
+        }
         return venueRepository.findAvailableVenues(date, location); //
     }
 
@@ -36,7 +39,7 @@ public class VenueService {
     }
 
     public Reservation reserveVenue(Long venueId, LocalDate date, String location) { //
-        if(date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
+        if(date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
             throw new RuntimeException("Venue booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
         }
         Optional<Venue> optionalVenue = venueRepository.findById(venueId); //

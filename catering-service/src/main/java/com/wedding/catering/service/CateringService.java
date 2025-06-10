@@ -23,8 +23,10 @@ public class CateringService {
 
     // Fetch companies available for a specific date and location
     public List<CateringCompany> getAvailableCompanies(String dateString, String location) {
-        LocalDate date = LocalDate.parse(dateString);
-
+        LocalDate date = LocalDate.parse(dateString); // Parse date string to LocalDate
+        if (date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
+            throw new RuntimeException("Venue booking date: " + date + " is after or 2years before today: " + LocalDate.now());
+        }
         List<CateringCompany> allCompanies = cateringCompanyRepository.findAll();
 
         return allCompanies.stream()
