@@ -1,8 +1,8 @@
 package com.wedding.broker.client;
 
 import com.wedding.broker.model.Catering;
-import com.wedding.broker.model.Reservation;
-import com.wedding.broker.model.ReserveRequest;
+import com.wedding.broker.model.VenueReservation;
+import com.wedding.broker.model.VenueReserveRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -37,9 +37,9 @@ public class CateringClient {
         return restTemplate.getForObject(cateringApiUrl + "/catering/{id}", Catering.class, companyId);
     }
 
-    public Reservation reserve(String companyId, String date, String location, int timeout) {
-        ReserveRequest request = new ReserveRequest(companyId, date, location, timeout);
-        return restTemplate.postForObject(cateringApiUrl + "/catering/reserve", request, Reservation.class);
+    public VenueReservation reserve(String companyId, String date, String location) {
+        VenueReserveRequest request = new VenueReserveRequest(companyId, date, location);
+        return restTemplate.postForObject(cateringApiUrl + "/catering/reserve", request, VenueReservation.class);
     }
 
     public void confirm(String reservationId) {

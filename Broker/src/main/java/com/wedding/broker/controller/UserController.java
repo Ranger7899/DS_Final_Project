@@ -120,7 +120,7 @@ public class UserController {
         if (venueId != null && !venueId.trim().isEmpty()) {
             try {
                 // Reserve venue
-                VenueReservation reservationVenue = venueClient.reserve(venueId, date, location, 30);
+                VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
 
@@ -144,7 +144,7 @@ public class UserController {
                 // Debug input
                 System.out.println("Attempting to reserve photographer with ID: " + photographerId);
                 // Reserve photographer
-                PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location, 30);
+                PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
                 photographer = photographerClient.getPhotographerById(photographerId);
                 totalPrice += photographer.getPrice();
 

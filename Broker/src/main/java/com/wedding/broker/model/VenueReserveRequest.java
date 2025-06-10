@@ -4,15 +4,13 @@ public class VenueReserveRequest {
     private String venueId;
     private String date;
     private String location;
-    private int timeout;
 
     public VenueReserveRequest() {}
 
-    public VenueReserveRequest(String venueId, String date, String location, int timeout) {
+    public VenueReserveRequest(String venueId, String date, String location) {
         this.venueId = venueId;
         this.date = date;
         this.location = location;
-        this.timeout = timeout;
     }
 
     // Getters and setters
@@ -22,6 +20,4 @@ public class VenueReserveRequest {
     public void setDate(String date) { this.date = date; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
-    public int getTimeout() { return timeout; }
-    public void setTimeout(int timeout) { this.timeout = timeout; }
 }
