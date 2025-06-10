@@ -180,11 +180,11 @@ public class UserController {
             }
 
             // Fetch photographer details if photographerId is provided
-            if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
-                // Placeholder: Replace with actual photographer service call when available
-                photographer = getDummyPhotographer(orderRequest.getPhotographerId());
-                totalPrice += photographer.getPrice();
-            }
+            // if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
+            //     // Placeholder: Replace with actual photographer service call when available
+            //     photographer = getDummyPhotographer(orderRequest.getPhotographerId());
+            //     totalPrice += photographer.getPrice();
+            // }
 
             // Add attributes to model for complete.html
             model.addAttribute("venue", venue);
