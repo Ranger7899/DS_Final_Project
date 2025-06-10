@@ -188,7 +188,7 @@
       </div>
       <div class="fixed-bottom-bar flex justify-center items-center gap-4">
         <p id="total-price" class="text-lg font-bold text-gray-800">Total: $0</p>
-        <form id="booking-form" method="GET" action="/confirm" data-date="2025-06-19" data-location="New York, NY, USA">
+        <form id="booking-form" method="GET" action="/confirm" th:attr="data-date=${date}, data-location=${location}">
           <input type="hidden" name="venueId" id="venueId">
           <input type="hidden" name="photographerId" id="photographerId">
           <input type="hidden" name="date" id="date">
