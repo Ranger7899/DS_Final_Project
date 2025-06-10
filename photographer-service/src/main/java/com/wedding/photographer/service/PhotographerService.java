@@ -36,22 +36,22 @@ public class PhotographerService {
         }
     }
 
-    public Reservation reservePhotographer(Long photoId, LocalDate date, String location){
-        if(date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
-            throw new RuntimeException("Photographer booking date: "+date+ " is after or 2years before today: " +LocalDate.now());
+    public Reservation reservePhotographer(Long photoId, LocalDate date, String location) {
+        if (date.isAfter(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
+            throw new RuntimeException("Photographer booking date: " + date + " is after or 2years before today: " + LocalDate.now());
         }
         Optional<Photographer> optionalPhotographer = photographerRepository.findById(photoId);
-        if(optionalPhotographer.isEmpty()){
-            throw new RuntimeException("Photographer with Id"+ photoId +" not found.");
+        if (optionalPhotographer.isEmpty()) {
+            throw new RuntimeException("Photographer with Id" + photoId + " not found.");
         }
         Photographer photographer = optionalPhotographer.get();
-        if(!photographer.isAvailable()){
+        if (!photographer.isAvailable()) {
             throw new RuntimeException("Photographer " + photographer.getName() + "is not generally available. ");
         }
         List<Reservation> existingReservations = reservationRepository.findByPhotoIdAndDateAndStatusIn(photoId, date, Arrays.asList("pending", "confirmed"));
 
-        if(!existingReservations.isEmpty()){
-            throw new RuntimeException("Photographer" + photographer.getName() + " is already reserved for " + date +".");
+        if (!existingReservations.isEmpty()) {
+            throw new RuntimeException("Photographer" + photographer.getName() + " is already reserved for " + date + ".");
         }
 
         Reservation reservation = new Reservation(
@@ -60,7 +60,13 @@ public class PhotographerService {
                 location,
                 "pending"
         );
-        return reservationRepository.save(reservation);
+        Reservation result;
+        try {
+            result = reservationRepository.save(reservation);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to make pending reservation in database.", e);
+        }
+        return result;
     }
 
     public void confirmReservation(Long reservationId){
@@ -68,8 +74,16 @@ public class PhotographerService {
 
         if(optionalReservation.isPresent()){
             Reservation reservation = optionalReservation.get();
-            reservation.setStatus("confirmed");
-            reservationRepository.save(reservation);
+            if("pending".equalsIgnoreCase(reservation.getStatus())){
+                try{
+                    reservation.setStatus("confirmed");
+                    reservationRepository.save(reservation);
+                } catch (Exception e){
+                    throw new RuntimeException("Failed to confirm reservation in database.", e);
+                }
+            }else{
+                throw new RuntimeException("Reservation with ID " + reservationId + " is not in a pending state.");
+            }
         }else{
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
@@ -78,11 +92,14 @@ public class PhotographerService {
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
         if (optionalReservation.isPresent()){
             Reservation reservation = optionalReservation.get();
-            reservation.setStatus("cancelled");
-            reservationRepository.save(reservation);
+            try{
+                reservation.setStatus("cancelled");
+                reservationRepository.save(reservation);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to cancel reservation in database.", e);
+            }
         }else{
             throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
-
         }
     }
 

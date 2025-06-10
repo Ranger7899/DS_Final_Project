@@ -67,30 +67,46 @@ public class VenueService {
                 location,
                 "pending" // Initial status
         );
-        return reservationRepository.save(reservation); //
+        Reservation result;
+        try {
+            result = reservationRepository.save(reservation);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to make pending reservation in database.", e);
+        }
+        return result;
     }
 
     public void confirmReservation(Long reservationId) { // Changed ID type to Long
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
-        if (optionalReservation.isPresent()) { //
-            Reservation reservation = optionalReservation.get(); //
-            reservation.setStatus("confirmed"); //
-            reservationRepository.save(reservation); //
-        } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
+        if(optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            if("pending".equalsIgnoreCase(reservation.getStatus())){
+                try{
+                    reservation.setStatus("confirmed");
+                    reservationRepository.save(reservation);
+                } catch (Exception e){
+                    throw new RuntimeException("Failed to confirm reservation in database.", e);
+                }
+            }else{
+                throw new RuntimeException("Reservation with ID " + reservationId + " is not in a pending state.");
+            }
+        }else{
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 
     public void cancelReservation(Long reservationId) { // Changed ID type to Long
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId); //
-        if (optionalReservation.isPresent()) { //
-            Reservation reservation = optionalReservation.get(); //
-            reservation.setStatus("cancelled"); //
-            reservationRepository.save(reservation); //
-            // No need to change venue availability here, as venue availability is general, not date-specific.
-            // The `findAvailableVenues` method will now implicitly exclude cancelled reservations.
-        } else {
-            throw new RuntimeException("Reservation with ID " + reservationId + " not found."); //
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+        if (optionalReservation.isPresent()){
+            Reservation reservation = optionalReservation.get();
+            try{
+                reservation.setStatus("cancelled");
+                reservationRepository.save(reservation);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to cancel reservation in database.", e);
+            }
+        }else{
+            throw new RuntimeException("Reservation with ID " + reservationId + " not found.");
         }
     }
 
