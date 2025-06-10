@@ -7,7 +7,6 @@ public class ReserveRequest {
     private Long companyId;
     private LocalDate date;
     private String location;
-    private int timeout;
 
     public ReserveRequest() {}
 
@@ -15,7 +14,6 @@ public class ReserveRequest {
         this.companyId = companyId;
         this.date = date;
         this.location = location;
-        this.timeout = timeout;
     }
 
     public Long getCompanyId() {
@@ -42,11 +40,4 @@ public class ReserveRequest {
         this.location = location;
     }
 
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
 }

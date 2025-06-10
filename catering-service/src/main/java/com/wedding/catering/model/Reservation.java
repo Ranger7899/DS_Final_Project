@@ -2,6 +2,7 @@ package com.wedding.catering.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservations")
@@ -20,19 +21,17 @@ public class Reservation {
     private String location;
 
     private String status; // "pending", "confirmed", "cancelled"
+    @Column(name = "created", nullable = false, updatable = false )
+    private LocalDateTime created;
+
+    @PrePersist
+    protected void onCreateRecord(){
+        this.created = LocalDateTime.now();
+    }
 
     public Reservation() {}
 
     public Reservation(Long cateringCompanyId, LocalDate date, String location, String status) {
-        this.cateringCompanyId = cateringCompanyId;
-        this.date = date;
-        this.location = location;
-        this.status = status;
-
-    }
-
-    public Reservation(Long id, Long cateringCompanyId, LocalDate date, String location, String status) {
-        this.id = id;
         this.cateringCompanyId = cateringCompanyId;
         this.date = date;
         this.location = location;
@@ -79,6 +78,7 @@ public class Reservation {
     public void setStatus(String status) {
         this.status = status;
     }
+    public LocalDateTime getCreated() {return created; }
 
     @Override
     public String toString() {
@@ -88,7 +88,7 @@ public class Reservation {
                 ", date=" + date +
                 ", location='" + location + '\'' +
                 ", status='" + status + '\'' +
-
+                ", created='" + created + '\'' +
                 '}';
     }
 }

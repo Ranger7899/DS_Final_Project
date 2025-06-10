@@ -41,8 +41,7 @@ public class CateringController {
             Reservation reservation = cateringService.reserveCatering(
                     request.getCompanyId(),
                     request.getDate(),
-                    request.getLocation(),
-                    request.getTimeout()
+                    request.getLocation()
             );
             return ResponseEntity.ok(reservation); // 200 OK
         } catch (RuntimeException e) {

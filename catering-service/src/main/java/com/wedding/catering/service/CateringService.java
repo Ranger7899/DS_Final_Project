@@ -42,7 +42,7 @@ public class CateringService {
     }
 
     // Create a reservation
-    public Reservation reserveCatering(Long companyId, LocalDate date, String location, int timeout) {
+    public Reservation reserveCatering(Long companyId, LocalDate date, String location) {
         Optional<CateringCompany> optionalCompany = cateringCompanyRepository.findById(companyId);
 
         if (optionalCompany.isEmpty()) {
