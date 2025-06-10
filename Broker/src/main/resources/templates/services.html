@@ -66,6 +66,7 @@
   <script>
     let selectedVenue = null;
     let selectedPhotographer = null;
+    let selectedCatering = null;
 
     document.getElementById('booking-form').addEventListener('submit', function(event) {
         console.log('Form action on submit:', this.action);
@@ -82,7 +83,7 @@
           element.classList.add('selected');
           selectedVenue = id;
         }
-      } else {
+      } else if(type === 'photographer'){
         if (selectedPhotographer === id) {
           element.classList.remove('selected');
           selectedPhotographer = null;
@@ -90,6 +91,15 @@
           document.querySelectorAll('.photographer-card.selected').forEach(el => el.classList.remove('selected'));
           element.classList.add('selected');
           selectedPhotographer = id;
+        }
+      } else {
+        if (selectedCatering === id) {
+          element.classList.remove('selected');
+          selectedCatering = null;
+        } else {
+          document.querySelectorAll('.catering-card.selected').forEach(el => el.classList.remove('selected'));
+          element.classList.add('selected');
+          selectedCatering = id;
         }
       }
       updateTotal();
@@ -100,8 +110,10 @@
       let total = 0;
       const venueEl = document.querySelector('.venue-card.selected');
       const photographerEl = document.querySelector('.photographer-card.selected');
+      const cateringEl = document.querySelector('.catering-card.selected');
       if (venueEl) total += parseInt(venueEl.dataset.price);
       if (photographerEl) total += parseInt(photographerEl.dataset.price);
+      if (cateringEl) total += parseInt(cateringEl.dataset.price);
       document.getElementById('total-price').textContent = `Total: $${total.toLocaleString()}`;
     }
 
@@ -112,6 +124,7 @@
       // Update hidden input fields
       document.getElementById('venueId').value = selectedVenue || '';
       document.getElementById('photographerId').value = selectedPhotographer || '';
+      document.getElementById('cateringId').value = selectedCatering || '';
       document.getElementById('date').value = form.dataset.date || '';
       document.getElementById('location').value = form.dataset.location || '';
       
@@ -119,6 +132,7 @@
       console.log('Form inputs:', {
         venueId: document.getElementById('venueId').value,
         photographerId: document.getElementById('photographerId').value,
+        cateringId: document.getElementById('cateringId').value,
         date: document.getElementById('date').value,
         location: document.getElementById('location').value
       });
@@ -146,7 +160,7 @@
       </div>
       <div class="flex flex-col md:flex-row gap-8">
         <!-- Venues Column -->
-        <div class="w-full md:w-1/2">
+        <div class="w-full md:w-1/3">
           <h3 class="text-2xl text-gray-800 mb-4">Venues</h3>
           <div th:if="${not #lists.isEmpty(venues)}" class="space-y-4">
             <div th:each="venue : ${venues}" class="venue-card card bg-white p-6 rounded-lg shadow-md cursor-pointer" 
@@ -166,7 +180,7 @@
           </div>
         </div>
         <!-- Photographers Column -->
-        <div class="w-full md:w-1/2">
+        <div class="w-full md:w-1/3">
           <h3 class="text-2xl text-gray-800 mb-4">Photographers</h3>
           <div th:if="${not #lists.isEmpty(photographers)}" class="space-y-4">
             <div th:each="photographer : ${photographers}" class="photographer-card card bg-white p-6 rounded-lg shadow-md cursor-pointer" 
@@ -185,12 +199,33 @@
             <p>Please try again later or pick <a th:href="@{/(date=${date.minusDays(1)},location=${location})}" class="text-pink-600">a different date</a> or <a th:href="@{/(date=${date},location='Tuscany, Italy')}" class="text-pink-600">another location</a>.</p>
           </div>
         </div>
+        <!-- Catering Column -->
+        <div class="w-full md:w-1/3">
+          <h3 class="text-2xl text-gray-800 mb-4">Catering</h3>
+          <div th:if="${not #lists.isEmpty(catering)}" class="space-y-4">
+            <div th:each="catering : ${catering}" class="catering-card card bg-white p-6 rounded-lg shadow-md cursor-pointer"
+                 th:data-price="${catering.price}"
+                 th:data-id="${catering.id}"
+                 th:attr="onclick='toggleSelection(this, \'catering\', \'' + ${catering.id} + '\', ' + ${catering.price} + ')'">
+              <img th:src="${cateringrBaseUrl} + ${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
+              <h4 class="text-xl font-bold text-gray-800" th:text="${catering.name}"></h4>
+              <p class="text-gray-600" th:text="'Price: $' + ${catering.price}"></p>
+              <p class="text-gray-600" th:text="'Style: ' + ${catering.style}"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${catering.rating} + '/5'"></p>
+            </div>
+          </div>
+          <div th:if="${#lists.isEmpty(catering)}" class="text-gray-600">
+            <p th:text="'No catering available for ' + ${location} + ' on ' + ${date} + '.'"></p>
+            <p>Please try again later or pick <a th:href="@{/(date=${date.minusDays(1)},location=${location})}" class="text-pink-600">a different date</a> or <a th:href="@{/(date=${date},location='Tuscany, Italy')}" class="text-pink-600">another location</a>.</p>
+          </div>
+        </div>
       </div>
       <div class="fixed-bottom-bar flex justify-center items-center gap-4">
         <p id="total-price" class="text-lg font-bold text-gray-800">Total: $0</p>
         <form id="booking-form" method="GET" action="/confirm" th:attr="data-date=${date}, data-location=${location}">
           <input type="hidden" name="venueId" id="venueId">
           <input type="hidden" name="photographerId" id="photographerId">
+          <input type="hidden" name="cateringId" id="cateringId">
           <input type="hidden" name="date" id="date">
           <input type="hidden" name="location" id="location">
           <button id="book-button" type="submit" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Book Selection</button>

@@ -110,6 +110,7 @@
 <script th:inline="javascript">
   const VENUE_API_BASE_URL = /*[[${venueServiceApiBaseUrl}]]*/ 'none';
   const PHOTOGRAPHER_API_BASE_URL = /*[[${photographerServiceApiBaseUrl}]]*/ 'none';
+  const CATERING_API_BASE_URL = /*[[${cateringServiceApiBaseUrl}]]*/ 'none';
 
   async function fetchLocations() {
     const locationDropdown = document.getElementById('location');
@@ -117,12 +118,15 @@
     locationDropdown.disabled = true;
     const venueUrl = `${VENUE_API_BASE_URL}/locations`;
     const photographerUrl = `${PHOTOGRAPHER_API_BASE_URL}/locations`;
+    const cateringUrl = `${CATERING_API_BASE_URL}/locations`;
     try {
-      const [venueLocations, photographerLocations] = await Promise.all([
+      const [venueLocations, photographerLocations, cateringLocations] = await Promise.all([
         fetch(venueUrl).then(res => res.ok ? res.json() : []).catch(() => []),
         fetch(photographerUrl).then(res => res.ok ? res.json() : []).catch(() => [])
+        fetch(cateringUrl).then(res => res.ok ? res.json() : []).catch(() => [])
+
       ]);
-      const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations]));
+      const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations, ...cateringLocations]));
       locationDropdown.innerHTML = '';
       locationDropdown.disabled = false;
       if (allLocations.length === 0) {
