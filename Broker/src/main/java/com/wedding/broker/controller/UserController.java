@@ -230,6 +230,11 @@ public class UserController {
 
     @PostMapping("/order")
     public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
+        
+        model.addAttribute("appBaseUrl", appBaseUrl);
+        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
+        model.addAttribute("cateringBaseUrl", cateringBaseUrl);
+        
         try {
             Venue venue = null;
             Photographer photographer = null;

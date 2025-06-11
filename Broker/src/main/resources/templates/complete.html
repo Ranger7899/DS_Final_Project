@@ -53,7 +53,7 @@
         <h3 class="text-2xl text-gray-800 mb-4">Booked Venue</h3>
         <div th:if="${venue}">
           <div class="card bg-white p-6 rounded-lg shadow-md">
-            <img th:src="${venue.images}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
+            <img th:src="${appBaseUrl} + ${venue.images}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
             <h4 class="text-xl font-bold text-gray-800" th:text="${venue.name}"></h4>
             <div class="card-content">
               <p class="text-gray-600" th:text="'Price: $' + ${venue.price}"></p>
@@ -73,7 +73,7 @@
         <h3 class="text-2xl text-gray-800 mb-4">Booked Photographer</h3>
         <div th:if="${photographer}">
           <div class="card bg-white p-6 rounded-lg shadow-md">
-            <img th:src="${photographer.images}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
+            <img th:src="${photographerBaseUrl} + ${photographer.images}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
             <h4 class="text-xl font-bold text-gray-800" th:text="${photographer.name}"></h4>
             <div class="card-content">
               <p class="text-gray-600" th:text="'Price: $' + ${photographer.price}"></p>
@@ -92,7 +92,7 @@
         <h3 class="text-2xl text-gray-800 mb-4">Booked Catering</h3>
         <div th:if="${catering}">
           <div class="card bg-white p-6 rounded-lg shadow-md">
-            <img th:src="${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
+            <img th:src="${cateringBaseUrl} + ${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
             <h4 class="text-xl font-bold text-gray-800" th:text="${catering.name}"></h4>
             <div class="card-content">
               <p class="text-gray-600" th:text="'Price: $' + ${catering.price}"></p>
