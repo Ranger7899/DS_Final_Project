@@ -48,44 +48,64 @@
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-8">
-        <!-- Venue Details -->
-        <div class="w-full md:w-1/2">
-          <h3 class="text-2xl text-gray-800 mb-4">Booked Venue</h3>
-          <div th:if="${venue}">
-            <div class="card bg-white p-6 rounded-lg shadow-md">
-              <img th:src="${venue.images}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
-              <h4 class="text-xl font-bold text-gray-800" th:text="${venue.name}"></h4>
-              <div class="card-content">
-                <p class="text-gray-600" th:text="'Price: $' + ${venue.price}"></p>
-                <p class="text-gray-600" th:text="'Capacity: ' + ${venue.capacity} + ' guests'"></p>
-                <p class="text-gray-600" th:text="'Rating: ' + ${venue.rating} + '/5'"></p>
-                <p class="text-gray-600" th:text="'Style: ' + ${venue.style}"></p>
-              </div>
+      <!-- Venue Details -->
+      <div class="w-full md:w-1/3">
+        <h3 class="text-2xl text-gray-800 mb-4">Booked Venue</h3>
+        <div th:if="${venue}">
+          <div class="card bg-white p-6 rounded-lg shadow-md">
+            <img th:src="${venue.images}" th:alt="${venue.name}" class="w-full h-48 object-cover rounded mb-4">
+            <h4 class="text-xl font-bold text-gray-800" th:text="${venue.name}"></h4>
+            <div class="card-content">
+              <p class="text-gray-600" th:text="'Price: $' + ${venue.price}"></p>
+              <p class="text-gray-600" th:text="'Capacity: ' + ${venue.capacity} + ' guests'"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${venue.rating} + '/5'"></p>
+              <p class="text-gray-600" th:text="'Style: ' + ${venue.style}"></p>
             </div>
-          </div>
-          <div th:unless="${venue}" class="text-gray-600">
-            <p>No venue booked.</p>
           </div>
         </div>
-        <!-- Photographer Details -->
-        <div class="w-full md:w-1/2">
-          <h3 class="text-2xl text-gray-800 mb-4">Booked Photographer</h3>
-          <div th:if="${photographer}">
-            <div class="card bg-white p-6 rounded-lg shadow-md">
-              <img th:src="${photographer.image}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
-              <h4 class="text-xl font-bold text-gray-800" th:text="${photographer.name}"></h4>
-              <div class="card-content">
-                <p class="text-gray-600" th:text="'Price: $' + ${photographer.price}"></p>
-                <p class="text-gray-600" th:text="'Style: ' + ${photographer.style}"></p>
-                <p class="text-gray-600" th:text="'Rating: ' + ${photographer.rating} + '/5'"></p>
-              </div>
-            </div>
-          </div>
-          <div th:unless="${photographer}" class="text-gray-600">
-            <p>No photographer booked.</p>
-          </div>
+        <div th:unless="${venue}" class="text-gray-600">
+          <p>No venue booked.</p>
         </div>
       </div>
+
+      <!-- Photographer Details -->
+      <div class="w-full md:w-1/3">
+        <h3 class="text-2xl text-gray-800 mb-4">Booked Photographer</h3>
+        <div th:if="${photographer}">
+          <div class="card bg-white p-6 rounded-lg shadow-md">
+            <img th:src="${photographer.images}" th:alt="${photographer.name}" class="w-full h-48 object-cover rounded mb-4">
+            <h4 class="text-xl font-bold text-gray-800" th:text="${photographer.name}"></h4>
+            <div class="card-content">
+              <p class="text-gray-600" th:text="'Price: $' + ${photographer.price}"></p>
+              <p class="text-gray-600" th:text="'Style: ' + ${photographer.style}"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${photographer.rating} + '/5'"></p>
+            </div>
+          </div>
+        </div>
+        <div th:unless="${photographer}" class="text-gray-600">
+          <p>No photographer booked.</p>
+        </div>
+      </div>
+
+      <!-- Catering Details -->
+      <div class="w-full md:w-1/3">
+        <h3 class="text-2xl text-gray-800 mb-4">Booked Catering</h3>
+        <div th:if="${catering}">
+          <div class="card bg-white p-6 rounded-lg shadow-md">
+            <img th:src="${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
+            <h4 class="text-xl font-bold text-gray-800" th:text="${catering.name}"></h4>
+            <div class="card-content">
+              <p class="text-gray-600" th:text="'Price: $' + ${catering.price}"></p>
+              <p class="text-gray-600" th:text="'Rating: ' + ${catering.rating} + '/5'"></p>
+            </div>
+          </div>
+        </div>
+        <div th:unless="${catering}" class="text-gray-600">
+          <p>No catering booked.</p>
+        </div>
+      </div>
+    </div>
+
       <div class="mt-8">
         <h3 class="text-2xl text-gray-800 mb-4">Booking Details</h3>
         <p class="text-lg font-bold text-gray-800" th:text="'Total: $' + ${totalPrice}"></p>
