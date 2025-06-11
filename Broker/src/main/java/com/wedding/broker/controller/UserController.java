@@ -3,11 +3,9 @@ package com.wedding.broker.controller;
 
 import com.wedding.broker.client.CateringClient;
 import com.wedding.broker.model.*;
-import com.wedding.broker.service.OrderService;
 import com.wedding.broker.client.VenueClient; // Import VenueClient
 import com.wedding.broker.client.PhotographerClient; // Import PhotographerClient
 
-import org.hibernate.cache.spi.support.CollectionReadOnlyAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -18,18 +16,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List; // Import List
-import java.util.concurrent.TimeUnit;
+
 
 @Controller
 public class UserController {
-    @Autowired
-    private OrderService orderService;
-
     @Value("${venue.api.url}") // Inject the value from application.properties
     private String appBaseUrl;
 
@@ -227,58 +221,6 @@ public class UserController {
 
         return "confirm";
     }
-
-    @PostMapping("/order")
-    public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
-        
-        model.addAttribute("appBaseUrl", appBaseUrl);
-        model.addAttribute("photographerBaseUrl", photographerBaseUrl);
-        model.addAttribute("cateringBaseUrl", cateringBaseUrl);
-        
-        try {
-            Venue venue = null;
-            Photographer photographer = null;
-            Catering catering = null;
-            int totalPrice = 0;
-
-            // Confirm venue if selected
-            if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
-                venueClient.confirm(orderRequest.getVenueReservationId());
-                venue = venueClient.getVenueById(orderRequest.getVenueId());
-                totalPrice += venue.getPrice();
-            }
-
-            // Confirm photographer if selected
-            if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
-                photographerClient.confirm(orderRequest.getPhotographerReservationId());
-                photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
-                totalPrice += photographer.getPrice();
-            }
-
-            // Confirm catering if selected
-            if (orderRequest.getCateringId() != null && !orderRequest.getCateringId().isEmpty()) {
-                cateringClient.confirm(orderRequest.getCateringReservationId());
-                catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
-                totalPrice += catering.getPrice();
-            }
-
-            // Add data to model for rendering confirmation
-            model.addAttribute("venue", venue);
-            model.addAttribute("photographer", photographer);
-            model.addAttribute("catering", catering);
-            model.addAttribute("totalPrice", totalPrice);
-            model.addAttribute("date", orderRequest.getDate());
-            model.addAttribute("location", orderRequest.getLocation());
-            model.addAttribute("address", orderRequest.getAddress());
-            model.addAttribute("paymentDetails", orderRequest.getPaymentDetails());
-
-            return "complete";
-        } catch (RuntimeException e) {
-            return "redirect:/error?message=" + e.getMessage();
-        }
-    }
-
-
 
     @GetMapping("/error")
     public String error(@RequestParam(required = false) String message, Model model) {

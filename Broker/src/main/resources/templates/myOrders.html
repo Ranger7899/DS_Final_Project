@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Manage Orders</title>
+  <title>My Orders</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,10 +18,10 @@
 </head>
 <body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
 <div class="max-w-7xl mx-auto">
-  <h1 class="text-4xl text-pink-600 text-center mb-8">All Customer Orders</h1>
+  <h1 class="text-4xl text-pink-600 text-center mb-8" th:text="${viewingUserId != null ? 'Orders for User: ' + viewingUserId : 'My Orders'}">My Orders</h1>
 
   <div th:if="${orders.isEmpty()}" class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-md">
-    <p>No orders found in the database.</p>
+    <p th:text="${viewingUserId != null ? 'No orders found for user ' + viewingUserId + '.' : 'You have no orders yet.'}"></p>
   </div>
 
   <div th:unless="${orders.isEmpty()}" class="overflow-x-auto bg-white shadow-md rounded-lg">
