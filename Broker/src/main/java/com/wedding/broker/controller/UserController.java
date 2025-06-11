@@ -222,6 +222,25 @@ public class UserController {
         return "confirm";
     }
 
+    @PostMapping("/cancel-reservations")
+    public String cancelReservations(@RequestParam(required = false) String venueReservationId,
+                                    @RequestParam(required = false) String photographerReservationId,
+                                    @RequestParam(required = false) String cateringReservationId) {
+
+        if (venueReservationId != null && !venueReservationId.trim().isEmpty()) {
+            venueClient.cancel(venueReservationId);
+        }
+        if (photographerReservationId != null && !photographerReservationId.trim().isEmpty()) {
+            photographerClient.cancel(photographerReservationId);
+        }
+        if (cateringReservationId != null && !cateringReservationId.trim().isEmpty()) {
+            cateringClient.cancel(cateringReservationId);
+        }
+
+        return "redirect:/";
+    }
+
+
     @GetMapping("/error")
     public String error(@RequestParam(required = false) String message, Model model) {
         model.addAttribute("errorMessage", message != null ? message : "An unknown error occurred.");
