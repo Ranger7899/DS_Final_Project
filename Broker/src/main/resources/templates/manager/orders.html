@@ -18,53 +18,45 @@
 </head>
 <body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
 <div class="max-w-7xl mx-auto">
-  <h1 class="text-4xl text-pink-600 text-center mb-8">All Customer Orders</h1>
+  <h1 class="text-4xl text-pink-600 text-center font-bold mb-8">All Customer Orders</h1>
 
   <div th:if="${orders.isEmpty()}" class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-md">
     <p>No orders found in the database.</p>
   </div>
 
-  <div th:unless="${orders.isEmpty()}" class="overflow-x-auto bg-white shadow-md rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-pink-50">
-      <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Order ID</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">User ID</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Location</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Created At</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Updated At</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Services</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Address</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Payment Details</th>
-      </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-      <tr th:each="order : ${orders}" class="hover:bg-pink-50">
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.id}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.userId}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.date}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.location}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.status}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${#temporals.format(order.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-        <td class="px-6 py-4 text-sm text-gray-900">
-          <ul class="list-disc pl-5">
-            <li th:if="${order.venueName != null}" th:text="'Venue: ' + ${order.venueName}"></li>
-            <li th:if="${order.cateringName != null}" th:text="'Catering: ' + ${order.cateringName}"></li>
-            <li th:if="${order.photographerName != null}" th:text="'Photographer: ' + ${order.photographerName}"></li>
-            <span th:if="${order.venueName == null and order.cateringName == null and order.photographerName == null}" class="text-gray-500 italic">- No services -</span>
+  <div th:unless="${orders.isEmpty()}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div th:each="order : ${orders}" class="bg-white p-6 rounded-xl shadow-lg border border-pink-100 flex flex-col justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-pink-600 mb-2">Order #<span th:text="${order.id}"></span></h2>
+        <p class="text-sm text-gray-700"><strong>User ID:</strong> <span th:text="${order.userId}"></span></p>
+        <p class="text-sm text-gray-700"><strong>Date:</strong> <span th:text="${order.date}"></span></p>
+        <p class="text-sm text-gray-700"><strong>Location:</strong> <span th:text="${order.location}"></span></p>
+        <p class="text-sm text-gray-700"><strong>Status:</strong> <span th:text="${order.status}"></span></p>
+
+        <div class="mt-3">
+          <h3 class="text-sm font-semibold text-gray-800">Services:</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 ml-2">
+            <li th:if="${order.venueName}" th:text="'Venue: ' + ${order.venueName}"></li>
+            <li th:if="${order.cateringName}" th:text="'Catering: ' + ${order.cateringName}"></li>
+            <li th:if="${order.photographerName}" th:text="'Photographer: ' + ${order.photographerName}"></li>
+            <li th:if="${order.venueName == null and order.cateringName == null and order.photographerName == null}" class="italic text-gray-400">No services</li>
           </ul>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.address}"></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${order.paymentDetails}"></td>
-      </tr>
-      </tbody>
-    </table>
+        </div>
+
+        <div class="mt-3 text-sm text-gray-700">
+          <p><strong>Address:</strong> <span th:text="${order.address}"></span></p>
+          <p><strong>Payment:</strong> <span th:text="${order.paymentDetails}"></span></p>
+        </div>
+      </div>
+
+      <div class="mt-4 text-xs text-gray-500 border-t pt-3">
+        <p th:text="'Created: ' + ${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+        <p th:text="'Updated: ' + ${#temporals.format(order.updatedAt, 'yyyy-MM-dd HH:mm')}"></p>
+      </div>
+    </div>
   </div>
 
-  <div class="mt-6 text-center">
+  <div class="mt-10 text-center">
     <a href="/" class="inline-block px-6 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">Back to Home</a>
   </div>
 </div>
