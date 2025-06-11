@@ -98,6 +98,9 @@ public class OrderController {
                 newOrder.setCateringName(catering.getName());
             }
 
+            newOrder.setAddress(orderRequest.getAddress());
+            newOrder.setPaymentDetails(orderRequest.getPaymentDetails());
+
             orderRepository.save(newOrder); // Save the order to your local database
 
 
