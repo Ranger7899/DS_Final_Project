@@ -67,7 +67,7 @@
 <body class="bg-gray-50">
 <section class="py-12">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-4xl text-pink-600 text-center mb-8">Booking Complete</h1>
+    <h1 class="text-4xl text-pink-600 text-center font-bold mb-8">Booking Complete</h1>
     <div class="flex justify-center mb-6">
       <div class="flex items-center space-x-4 text-gray-700 text-sm">
         <span class="text-gray-400">1. Search</span>
@@ -153,9 +153,6 @@
       <div th:if="${message}" th:classappend="${messageType == 'success' ? 'success' : 'error'}" class="message">
         <p th:text="${message}"></p>
       </div>
-
-      <p><a href="/">Create another order</a></p>
-      <p><a href="/">Go to Home</a></p>
     </div>
   </div>
 </section>
