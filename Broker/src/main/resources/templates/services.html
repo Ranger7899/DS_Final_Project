@@ -67,6 +67,7 @@
     let selectedVenue = null;
     let selectedPhotographer = null;
     let selectedCatering = null;
+    
 
     document.getElementById('booking-form').addEventListener('submit', function(event) {
         console.log('Form action on submit:', this.action);
@@ -104,7 +105,7 @@
       }
       updateTotal();
       updateBookButton();
-    }
+    } 
 
     function updateTotal() {
       let total = 0;
@@ -120,27 +121,22 @@
     function updateBookButton() {
       const button = document.getElementById('book-button');
       const form = document.getElementById('booking-form');
-      
+
       // Update hidden input fields
       document.getElementById('venueId').value = selectedVenue || '';
       document.getElementById('photographerId').value = selectedPhotographer || '';
       document.getElementById('cateringId').value = selectedCatering || '';
       document.getElementById('date').value = form.dataset.date || '';
       document.getElementById('location').value = form.dataset.location || '';
-      
-      // Log the input values for debugging
-      console.log('Form inputs:', {
-        venueId: document.getElementById('venueId').value,
-        photographerId: document.getElementById('photographerId').value,
-        cateringId: document.getElementById('cateringId').value,
-        date: document.getElementById('date').value,
-        location: document.getElementById('location').value
-      });
-      
-      // Optionally disable button if required fields are missing
-      button.disabled = !selectedPhotographer || !form.dataset.date || !form.dataset.location;
-    }
 
+      // Determine conditions
+      const hasSelection = selectedVenue || selectedPhotographer || selectedCatering;
+      const hasDate = !!form.dataset.date;
+      const hasLocation = !!form.dataset.location;
+
+      // Enable only if at least one service is selected and both date & location are present
+      button.disabled = !(hasSelection && hasDate && hasLocation);
+    }
   </script>
 </head>
 <body class="bg-gray-50 pb-20">
@@ -202,19 +198,18 @@
         <!-- Catering Column -->
         <div class="w-full md:w-1/3">
           <h3 class="text-2xl text-gray-800 mb-4">Catering</h3>
-          <div th:if="${not #lists.isEmpty(catering)}" class="space-y-4">
-            <div th:each="catering : ${catering}" class="catering-card card bg-white p-6 rounded-lg shadow-md cursor-pointer"
+          <div th:if="${not #lists.isEmpty(caterings)}" class="space-y-4">
+            <div th:each="catering : ${caterings}" class="catering-card card bg-white p-6 rounded-lg shadow-md cursor-pointer"
                  th:data-price="${catering.price}"
                  th:data-id="${catering.id}"
                  th:attr="onclick='toggleSelection(this, \'catering\', \'' + ${catering.id} + '\', ' + ${catering.price} + ')'">
-              <img th:src="${cateringrBaseUrl} + ${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
+              <img th:src="${cateringBaseUrl} + ${catering.images}" th:alt="${catering.name}" class="w-full h-48 object-cover rounded mb-4">
               <h4 class="text-xl font-bold text-gray-800" th:text="${catering.name}"></h4>
               <p class="text-gray-600" th:text="'Price: $' + ${catering.price}"></p>
-              <p class="text-gray-600" th:text="'Style: ' + ${catering.style}"></p>
               <p class="text-gray-600" th:text="'Rating: ' + ${catering.rating} + '/5'"></p>
             </div>
           </div>
-          <div th:if="${#lists.isEmpty(catering)}" class="text-gray-600">
+          <div th:if="${#lists.isEmpty(caterings)}" class="text-gray-600">
             <p th:text="'No catering available for ' + ${location} + ' on ' + ${date} + '.'"></p>
             <p>Please try again later or pick <a th:href="@{/(date=${date.minusDays(1)},location=${location})}" class="text-pink-600">a different date</a> or <a th:href="@{/(date=${date},location='Tuscany, Italy')}" class="text-pink-600">another location</a>.</p>
           </div>
@@ -228,7 +223,7 @@
           <input type="hidden" name="cateringId" id="cateringId">
           <input type="hidden" name="date" id="date">
           <input type="hidden" name="location" id="location">
-          <button id="book-button" type="submit" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Book Selection</button>
+          <button id="book-button" type="submit" disabled class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Book Selection</button>
         </form>
       </div>
     </div>

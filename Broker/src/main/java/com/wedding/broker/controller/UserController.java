@@ -74,7 +74,7 @@ public class UserController {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
         model.addAttribute("photographerBaseUrl", photographerBaseUrl);
-        model.addAttribute("cateingBaseUrl", cateringBaseUrl);
+        model.addAttribute("cateringBaseUrl", cateringBaseUrl);
         // Parse date to LocalDate
         LocalDate parsedDate;
         try {
@@ -85,7 +85,7 @@ public class UserController {
             model.addAttribute("location", location);
             model.addAttribute("venues", Collections.emptyList());
             model.addAttribute("photographers", Collections.emptyList());
-            model.addAttribute("catering", Collections.emptyList());
+            model.addAttribute("caterings", Collections.emptyList());
             return "services";
         }
 
@@ -135,12 +135,15 @@ public class UserController {
         Photographer photographer = null;
         Catering catering = null;
         int totalPrice = 0;
-        // String reservationId = null;
+        String venueReservationId = null;
+        String photographerReservationId = null;
+        String cateringReservationId = null;
 
         if (venueId != null && !venueId.trim().isEmpty()) {
             try {
                 // Reserve venue
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
+                venueReservationId = reservationVenue.getId();
                 venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
                 // Debug log
@@ -164,6 +167,7 @@ public class UserController {
                 System.out.println("Attempting to reserve photographer with ID: " + photographerId);
                 // Reserve photographer
                 PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
+                photographerReservationId = reservationPhotographer.getId();
                 photographer = photographerClient.getPhotographerById(photographerId);
                 totalPrice += photographer.getPrice();
 
@@ -187,16 +191,17 @@ public class UserController {
         if (cateringId != null && !cateringId.trim().isEmpty()) {
             try {
                 // Debug input
-                System.out.println("Attempting to reserve catering company with ID: " + photographerId);
+                System.out.println("Attempting to reserve catering company with ID: " + cateringId);
                 // Reserve
-                CateringReservation reservationCatering = cateringClient.reserve(photographerId, date, location);
-                catering = cateringClient.getCateringCompanyById(photographerId);
+                CateringReservation reservationCatering = cateringClient.reserve(cateringId, date, location);
+                cateringReservationId = reservationCatering.getId();
+                catering = cateringClient.getCateringCompanyById(cateringId);
                 totalPrice += catering.getPrice();
 
                 // Debug log
                 System.out.println("Photographer Reserved:");
                 System.out.println("  Reservation ID: " + reservationCatering.getId());
-                System.out.println("  Photographer ID: " + catering.getId());
+                System.out.println("  CateringCompany ID: " + catering.getId());
                 System.out.println("  Name: " + catering.getName());
                 System.out.println("  Location: " + location);
                 System.out.println("  Date: " + date);
@@ -210,14 +215,15 @@ public class UserController {
             System.out.println("Catering ID is null or empty, skipping reservation.");
         }
 
-
         model.addAttribute("venue", venue);
         model.addAttribute("photographer", photographer);
         model.addAttribute("catering", catering);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("date", date);
         model.addAttribute("location", location);
-        // model.addAttribute("reservationId", reservationId);
+        model.addAttribute("venueReservationId", venueReservationId);
+        model.addAttribute("photographerReservationId", photographerReservationId);
+        model.addAttribute("cateringReservationId", cateringReservationId);
 
         return "confirm";
     }
@@ -225,46 +231,49 @@ public class UserController {
     @PostMapping("/order")
     public String placeOrder(@ModelAttribute OrderRequest orderRequest, Model model) {
         try {
-            // Process the order (e.g., save to database, handle payment)
-            // orderService.placeOrder(orderRequest);
-
             Venue venue = null;
             Photographer photographer = null;
             Catering catering = null;
             int totalPrice = 0;
 
-            // Fetch venue details and confirm reservation if venueId is provided
+            // Confirm venue if selected
             if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
+                venueClient.confirm(orderRequest.getVenueReservationId());
                 venue = venueClient.getVenueById(orderRequest.getVenueId());
                 totalPrice += venue.getPrice();
-                // if (orderRequest.getReservationId() != null && !orderRequest.getReservationId().isEmpty()) {
-                //     venueClient.confirm(orderRequest.getReservationId());
-                // }
             }
 
-            // Fetch photographer details if photographerId is provided
-            // if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
-            //     // Placeholder: Replace with actual photographer service call when available
-            //     photographer = getDummyPhotographer(orderRequest.getPhotographerId());
-            //     totalPrice += photographer.getPrice();
-            // }
+            // Confirm photographer if selected
+            if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
+                photographerClient.confirm(orderRequest.getPhotographerReservationId());
+                photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
+                totalPrice += photographer.getPrice();
+            }
 
-            // Add attributes to model for complete.html
+            // Confirm catering if selected
+            if (orderRequest.getCateringId() != null && !orderRequest.getCateringId().isEmpty()) {
+                cateringClient.confirm(orderRequest.getCateringReservationId());
+                catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
+                totalPrice += catering.getPrice();
+            }
+
+            // Add data to model for rendering confirmation
             model.addAttribute("venue", venue);
             model.addAttribute("photographer", photographer);
             model.addAttribute("catering", catering);
             model.addAttribute("totalPrice", totalPrice);
             model.addAttribute("date", orderRequest.getDate());
             model.addAttribute("location", orderRequest.getLocation());
-            // model.addAttribute("address", orderRequest.getAddress());
-            // model.addAttribute("paymentDetails", orderRequest.getPaymentDetails());
+            model.addAttribute("address", orderRequest.getAddress());
+            model.addAttribute("paymentDetails", orderRequest.getPaymentDetails());
 
-            return "complete"; // Render complete.html
+            return "complete";
         } catch (RuntimeException e) {
-            // Redirect to error page with message
             return "redirect:/error?message=" + e.getMessage();
         }
     }
+
+
 
     @GetMapping("/error")
     public String error(@RequestParam(required = false) String message, Model model) {

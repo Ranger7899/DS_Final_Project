@@ -122,9 +122,8 @@
     try {
       const [venueLocations, photographerLocations, cateringLocations] = await Promise.all([
         fetch(venueUrl).then(res => res.ok ? res.json() : []).catch(() => []),
-        fetch(photographerUrl).then(res => res.ok ? res.json() : []).catch(() => [])
+        fetch(photographerUrl).then(res => res.ok ? res.json() : []).catch(() => []),
         fetch(cateringUrl).then(res => res.ok ? res.json() : []).catch(() => [])
-
       ]);
       const allLocations = Array.from(new Set([...venueLocations, ...photographerLocations, ...cateringLocations]));
       locationDropdown.innerHTML = '';
