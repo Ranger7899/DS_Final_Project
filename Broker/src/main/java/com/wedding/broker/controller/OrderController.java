@@ -78,31 +78,29 @@ public class OrderController {
             // --- Create and save the Order entity to the database ---
             Order newOrder = new Order();
             newOrder.setCreatedAt(LocalDateTime.now());
-            newOrder.setUpdatedAt(LocalDateTime.now()); // Set initial updated_at
+            newOrder.setUpdatedAt(LocalDateTime.now());
             newOrder.setDate(orderRequest.getDate());
             newOrder.setLocation(orderRequest.getLocation());
             newOrder.setStatus("Confirmed"); // Or "Pending", "Booked", etc.
-            newOrder.setUserId(SecurityContextHolder.getContext().getAuthentication().getName()); // Get from authenticated user
-//            newOrder.setUserId("default_user_id"); // Placeholder: Replace with actual user ID logic
+            newOrder.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
 
             // Set service IDs and Names based on confirmed services
             if (venue != null) {
-                newOrder.setVenueId(venue.getId()); // Assuming Venue has an ID
+                newOrder.setVenueId(orderRequest.getVenueReservationId());
                 newOrder.setVenueName(venue.getName());
             }
             if (photographer != null) {
-                newOrder.setPhotographerId(photographer.getId()); // Assuming Photographer has an ID
+                newOrder.setPhotographerId(orderRequest.getPhotographerReservationId());
                 newOrder.setPhotographerName(photographer.getName());
             }
             if (catering != null) {
-                newOrder.setCateringId(catering.getId()); // Assuming Catering has an ID
+                newOrder.setCateringId(orderRequest.getCateringReservationId());
                 newOrder.setCateringName(catering.getName());
             }
 
             orderRepository.save(newOrder); // Save the order to your local database
 
-            // --- Add data to model for rendering confirmation (for the redirect) ---
-            // These attributes will be available on the redirected page
+
             redirectAttributes.addFlashAttribute("venue", venue);
             redirectAttributes.addFlashAttribute("photographer", photographer);
             redirectAttributes.addFlashAttribute("catering", catering);
@@ -114,7 +112,7 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("message", "Order successfully booked and saved!");
             redirectAttributes.addFlashAttribute("messageType", "success");
 
-            // Redirect to a success page
+
             return "redirect:/order/success";
         } catch (RuntimeException e) {
             e.printStackTrace();
