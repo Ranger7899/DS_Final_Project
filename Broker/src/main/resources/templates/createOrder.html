@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { background: #f4f4f4; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="date"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .form-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+<h1>Create New Order</h1>
+
+<form th:action="@{/orders}" th:object="${order}" method="post">
+
+    <div class="form-group">
+        <label for="orderDate">Order Date (e.g., YYYY-MM-DD):</label>
+        <input type="text" id="orderDate" name="date" th:field="*{date}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" th:field="*{location}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="status">Status:</label>
+        <input type="text" id="status" name="status" th:field="*{status}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId" th:field="*{userId}" required>
+    </div>
+
+    <h2>Service Details:</h2>
+    <div class="form-group">
+        <label for="venueId">Venue ID:</label>
+        <input type="text" id="venueId" name="venueId" th:field="*{venueId}">
+    </div>
+    <div class="form-group">
+        <label for="venueName">Venue Name:</label>
+        <input type="text" id="venueName" name="venueName" th:field="*{venueName}">
+    </div>
+
+    <div class="form-group">
+        <label for="cateringId">Catering ID:</label>
+        <input type="text" id="cateringId" name="cateringId" th:field="*{cateringId}">
+    </div>
+    <div class="form-group">
+        <label for="cateringName">Catering Name:</label>
+        <input type="text" id="cateringName" name="cateringName" th:field="*{cateringName}">
+    </div>
+
+    <div class="form-group">
+        <label for="photographerId">Photographer ID:</label>
+        <input type="text" id="photographerId" name="photographerId" th:field="*{photographerId}">
+    </div>
+    <div class="form-group">
+        <label for="photographerName">Photographer Name:</label>
+        <input type="text" id="photographerName" name="photographerName" th:field="*{photographerName}">
+    </div>
+
+    <input type="submit" value="Submit Order">
+</form>
+</body>
+</html>

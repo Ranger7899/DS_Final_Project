@@ -26,8 +26,12 @@
   <div class="container mx-auto px-8 flex justify-between items-center">
     <a th:href="@{/}" class="text-2xl font-bold text-pink-600">Marry Me Maybe</a>
     <div class="flex items-center space-x-4">
-      <span sec:authorize="isAuthenticated()">
-        <span class="text-gray-700 px-3 py-2 rounded-md text-sm font-medium" sec:authentication="name"></span>
+      <span sec:authorize="isAuthenticated()" class="flex items-center space-x-4"> <span class="text-gray-700 px-3 py-2 rounded-md text-sm font-medium" sec:authentication="name"></span>
+
+  <a th:href="@{/order/my-orders/{userId}(userId=${#authentication.name})}" class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">
+            My Orders
+        </a>
+
         <form th:action="@{/logout}" method="post" class="inline">
           <button type="submit" class="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">
             Logout
@@ -63,10 +67,6 @@
         <div>
           <button type="submit" class="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Find Your Perfect Wedding</button>
         </div>
-        <!-- <div class="mt-8" sec:authorize="!isAuthenticated()">
-          <p class="text-lg mb-4 text-gray-100">New here? Create your account to start planning!</p>
-          <a th:href="@{/register}" class="inline-block bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-pink-700 transform hover:scale-105 transition duration-300 ease-in-out text-xl">Sign Up Now</a>
-        </div> -->
       </form>
     </div>
   </div>
