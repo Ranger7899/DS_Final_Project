@@ -39,6 +39,10 @@ public class PhotographerClient {
     public Photographer getPhotographerById(String photographerId) {
         return restTemplate.getForObject(photographerApiUrl + "/photographers/{id}", Photographer.class, photographerId);
     }
+
+    public PhotographerReservation getPhotographerReservationById(String reservationId){
+        return  restTemplate.getForObject(photographerApiUrl+ "/photographers/reservation/{id}", PhotographerReservation.class, reservationId);
+    }
     
     public PhotographerReservation reserve(String photographerId, String date, String location) {
         PhotographerReserveRequest request = new PhotographerReserveRequest(photographerId, date, location);

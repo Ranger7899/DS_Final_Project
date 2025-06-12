@@ -10,13 +10,14 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> { // Extend JpaRepository and specify entity and ID type
     List<Reservation> findByPhotoIdAndDateAndStatusIn(Long photoId, LocalDate date, List<String> statuses);
 
     List<Reservation> findByCreatedBefore(LocalDateTime timeoutTime); //TODO: delete this if necessary
-
+    Optional<Reservation> findById(Long id);
     @Transactional
     @Modifying
     @Query(" DELETE FROM Reservation r " +

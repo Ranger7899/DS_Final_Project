@@ -35,6 +35,10 @@ public class CateringClient {
         return restTemplate.getForObject(cateringApiUrl + "/catering/{id}", Catering.class, companyId);
     }
 
+    public CateringReservation getCateringReservationById(String reservationId){
+        return  restTemplate.getForObject(cateringApiUrl+ "/catering/reservation/{id}", CateringReservation.class, reservationId);
+    }
+
     public CateringReservation reserve(String companyId, String date, String location) {
         CateringReserveRequest request = new CateringReserveRequest(companyId, date, location);
         return restTemplate.postForObject(cateringApiUrl + "/catering/reserve", request, CateringReservation.class);

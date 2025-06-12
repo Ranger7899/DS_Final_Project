@@ -118,6 +118,15 @@ public class CateringService {
                 .orElseThrow(() -> new RuntimeException("Catering Company with ID " + companyId + " not found."));
     }
 
+    public Reservation getReservationById(Long reservationID){
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationID);
+        if(optionalReservation.isPresent()){
+            return optionalReservation.get();
+        }else{
+            throw new RuntimeException("Reserrvation " + reservationID + " not found.");
+        }
+    }
+
     // List all distinct company locations
     public List<String> getAllDistinctLocations() {
         return cateringCompanyRepository.findDistinctLocationsOfAvailableCompanies();

@@ -110,7 +110,7 @@ public class OrderController {
             newOrder.setUpdatedAt(LocalDateTime.now());
             newOrder.setDate(orderRequest.getDate());
             newOrder.setLocation(orderRequest.getLocation());
-            newOrder.setStatus("Confirmed"); // Or "Pending", "Booked", etc.
+            newOrder.setStatus("Confirmed"); // Or "Cancelled"
             newOrder.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
 
             // Set service IDs and Names based on confirmed services
