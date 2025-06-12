@@ -263,6 +263,8 @@ public class UserController {
             cateringClient.cancel(cateringReservationId);
         }
 
+        //TODO: Broker DB Cancel
+
         return "redirect:/";
     }
 

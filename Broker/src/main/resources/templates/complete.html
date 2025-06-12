@@ -146,14 +146,6 @@
     <div class="mt-8 text-center">
       <a th:href="@{/(date=${date},location=${location})}" class="inline-block px-6 py-3 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors text-lg font-medium">Book Another</a>
     </div>
-    <hr class="my-12 border-t-2 border-gray-200">
-    <div class="order-status-message">
-      <h1 class="text-4xl text-pink-600 text-center mb-8">Order Submission Status (Integrated Message)</h1>
-
-      <div th:if="${message}" th:classappend="${messageType == 'success' ? 'success' : 'error'}" class="message">
-        <p th:text="${message}"></p>
-      </div>
-    </div>
   </div>
 </section>
 </body>
