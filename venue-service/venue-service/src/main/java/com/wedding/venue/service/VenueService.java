@@ -38,6 +38,15 @@ public class VenueService {
         }
     }
 
+    public Reservation getReservationById(Long reservationID){
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationID);
+        if(optionalReservation.isPresent()){
+            return optionalReservation.get();
+        }else{
+            throw new RuntimeException("Reserrvation " + reservationID + " not found.");
+        }
+    }
+
     public Reservation reserveVenue(Long venueId, LocalDate date, String location) { //
         if(date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))){
             throw new RuntimeException("Venue booking date: "+date+ " is after or 2years before today: " +LocalDate.now());

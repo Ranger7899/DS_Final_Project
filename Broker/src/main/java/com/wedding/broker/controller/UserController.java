@@ -6,6 +6,7 @@ import com.wedding.broker.model.*;
 import com.wedding.broker.client.VenueClient; // Import VenueClient
 import com.wedding.broker.client.PhotographerClient; // Import PhotographerClient
 
+import com.wedding.broker.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List; // Import List
+import java.util.Optional;
 
 
 @Controller
@@ -41,6 +43,9 @@ public class UserController {
 
     @Autowired
     private CateringClient cateringClient;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -241,20 +246,53 @@ public class UserController {
     @PostMapping("/cancel-reservations")
     public String cancelReservations(@RequestParam(required = false) String venueReservationId,
                                     @RequestParam(required = false) String photographerReservationId,
-                                    @RequestParam(required = false) String cateringReservationId) {
+                                    @RequestParam(required = false) String cateringReservationId,
+                                     @RequestParam(required = false) String orderId) {
 
-        if (venueReservationId != null && !venueReservationId.trim().isEmpty()) {
-            venueClient.cancel(venueReservationId);
+        VenueReservation venueReservation = null;
+        PhotographerReservation photographerReservation = null;
+        CateringReservation cateringReservation = null;
+        //Check connection to suppliers works before cancelling
+        try{
+            if(photographerReservationId != null) {
+                photographerReservation = photographerClient.getPhotographerReservationById(photographerReservationId);
+            }
+            if(venueReservationId != null){
+                venueReservation = venueClient.getVenueReservationById(venueReservationId);
+            }
+            if(cateringReservationId != null){
+                cateringReservation = cateringClient.getCateringReservationById(cateringReservationId);
+            }
+        }catch (Exception e){
+            return "redirect:/cancel-error/"+e.getMessage();
         }
-        if (photographerReservationId != null && !photographerReservationId.trim().isEmpty()) {
-            photographerClient.cancel(photographerReservationId);
+        //cancel orders when they are all ok
+        try {
+            if (venueReservationId != null && !venueReservationId.trim().isEmpty()) {
+                venueClient.cancel(venueReservationId);
+            }
+            if (photographerReservationId != null && !photographerReservationId.trim().isEmpty()) {
+                photographerClient.cancel(photographerReservationId);
+            }
+            if (cateringReservationId != null && !cateringReservationId.trim().isEmpty()) {
+                cateringClient.cancel(cateringReservationId);
+            }
+        } catch (Exception e) {
+            return "redirect:/cancel-error/"+e.getMessage();
         }
-        if (cateringReservationId != null && !cateringReservationId.trim().isEmpty()) {
-            cateringClient.cancel(cateringReservationId);
+        //change order from Confirmed to Cancelled in broker dB
+        if(orderId != null){
+            try {
+                Optional<Order> orderOptional = orderRepository.findById(Long.valueOf(orderId));
+                if (orderOptional.isPresent()) {
+                    Order order = orderOptional.get();
+                    order.setStatus("Cancelled");
+                    orderRepository.save(order);
+                }
+            }catch (Exception e){
+                return "redirect:/cancel-error/"+e.getMessage();
+            }
         }
-
-        //TODO: Broker DB Cancel
-
         return "redirect:/";
     }
 
@@ -281,5 +319,13 @@ public class UserController {
         model.addAttribute("location", location);
 
         return "error"; // You might want to create a simple error.html page
+    }
+
+    @GetMapping("/cancel-error")
+    public String cancelError(@RequestParam String message,
+                              Model model){
+        model.addAttribute("errorMessage", message);
+        return "cancel-error";
+
     }
 }

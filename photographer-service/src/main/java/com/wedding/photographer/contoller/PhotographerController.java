@@ -79,6 +79,16 @@ public class PhotographerController {
         }
     }
 
+    @GetMapping("/reservation/{id}")
+    public ResponseEntity<?> getReservationById(@PathVariable Long id){
+        try{
+            Reservation reservation = photographerService.getReservationById(id);
+            return ResponseEntity.ok(reservation);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
+        }
+    }
+
     // NEW: Endpoint to get all distinct locations
     @GetMapping("/locations")
     public ResponseEntity<List<String>> getAllLocations() {

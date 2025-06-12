@@ -1,6 +1,7 @@
 // src/main/java/com/wedding/broker/client/VenueClient.java
 package com.wedding.broker.client;
 
+import com.wedding.broker.model.PhotographerReservation;
 import com.wedding.broker.model.VenueReservation;
 import com.wedding.broker.model.VenueReserveRequest; // Keep this as is, it's consistent
 import com.wedding.broker.model.Venue; // Ensure this imports the updated broker Venue model
@@ -72,6 +73,10 @@ public class VenueClient {
 
     public Venue getVenueById(String venueId) {
         return restTemplate.getForObject(venueApiUrl + "/venues/{id}", Venue.class, venueId);
+    }
+
+    public VenueReservation getVenueReservationById(String reservationId){
+        return  restTemplate.getForObject(venueApiUrl+ "/venue/reservation/{id}", VenueReservation.class, reservationId);
     }
 
     public VenueReservation reserve(String venueId, String date, String location) {

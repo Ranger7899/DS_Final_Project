@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -17,6 +18,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // Find reservations by company and date where status is pending or confirmed
     List<Reservation> findByCateringCompanyIdAndDateAndStatusIn(Long cateringCompanyId, LocalDate date, List<String> statuses);
     List<Reservation> findByCreatedBefore(LocalDateTime timeoutTime);
+
+    Optional<Reservation> findById(Long id);
 
     @Transactional
     @Modifying

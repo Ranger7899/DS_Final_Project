@@ -74,6 +74,15 @@ public class VenueController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
         }
     }
+    @GetMapping("/reservation/{id}")
+    public ResponseEntity<?> getReservationById(@PathVariable Long id){
+        try{
+            Reservation reservation = venueService.getReservationById(id);
+            return ResponseEntity.ok(reservation);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
+        }
+    }
 
     // NEW: Endpoint to get all distinct locations
     @GetMapping("/locations")
