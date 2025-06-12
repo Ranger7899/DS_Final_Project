@@ -12,6 +12,7 @@ import com.wedding.broker.model.Catering;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -174,7 +175,7 @@ public class OrderController {
 
     // NEW: User's view: list orders for a specific user ID
     @GetMapping("/my-orders/{userId}") // Responds to GET /order/my-orders/{userId}
-    public String getUserOrders(@PathVariable String userId, Model model) {
+    public String getUserOrders(@PathVariable String userId, Model model, Authentication auth) {
         // IMPORTANT SECURITY NOTE: In a real application, you should NEVER trust the userId from the path variable
         // for displaying user-specific data. Instead, you should retrieve the authenticated user's ID
         // from Spring Security context (e.g., Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -185,6 +186,12 @@ public class OrderController {
         List<Order> userOrders = orderRepository.findByUserId(userId);
         model.addAttribute("orders", userOrders);
         model.addAttribute("viewingUserId", userId); // Optionally pass the userId for display on the page
+
+
+        if (!auth.getName().equals(userId)) {
+            return "redirect:/";        // <-- home page
+        }
+
         return "myOrders"; // Assumes you create a Thymeleaf HTML file named myOrders.html
     }
 
