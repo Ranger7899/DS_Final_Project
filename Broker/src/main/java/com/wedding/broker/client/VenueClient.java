@@ -76,7 +76,7 @@ public class VenueClient {
     }
 
     public VenueReservation getVenueReservationById(String reservationId){
-        return  restTemplate.getForObject(venueApiUrl+ "/venue/reservation/{id}", VenueReservation.class, reservationId);
+        return  restTemplate.getForObject(venueApiUrl+ "/venues/reservation/{id}", VenueReservation.class, reservationId);
     }
 
     public VenueReservation reserve(String venueId, String date, String location) {
