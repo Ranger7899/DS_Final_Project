@@ -67,7 +67,6 @@
     let selectedVenue = null;
     let selectedPhotographer = null;
     let selectedCatering = null;
-    
 
     document.getElementById('booking-form').addEventListener('submit', function(event) {
         console.log('Form action on submit:', this.action);
@@ -217,6 +216,7 @@
       </div>
       <div class="fixed-bottom-bar flex justify-center items-center gap-4">
         <p id="total-price" class="text-lg font-bold text-gray-800">Total: $0</p>
+          <!-- Reserve button -->
         <form id="booking-form" method="GET" action="/confirm" th:attr="data-date=${date}, data-location=${location}">
           <input type="hidden" name="venueId" id="venueId">
           <input type="hidden" name="photographerId" id="photographerId">

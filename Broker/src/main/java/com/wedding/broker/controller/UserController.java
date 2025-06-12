@@ -132,6 +132,7 @@ public class UserController {
         String venueReservationId = null;
         String photographerReservationId = null;
         String cateringReservationId = null;
+        ErrorOrderMessage errorOrderMessage = new ErrorOrderMessage();
 
         if (venueId != null && !venueId.trim().isEmpty()) {
             try {
@@ -140,7 +141,7 @@ public class UserController {
                 venueReservationId = reservationVenue.getId();
                 venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
-                // Debug log
+                // Debug log TODO: Remove debugs?
                 System.out.println("Venue Reserved:");
                 System.out.println("  Reservation ID: " + reservationVenue.getId());
                 System.out.println("  Venue ID: " + venue.getId());
@@ -150,8 +151,12 @@ public class UserController {
                 System.out.println("  Price: $" + venue.getPrice());
                 System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
-                return "error"; // Redirect to an error page or handle accordingly
+                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
+                venueReservationId = null;
+                venueId = null;
+                errorOrderMessage.setErrorTrue();
+                errorOrderMessage.addToMessage("Venue");
+                model.addAttribute("error", errorOrderMessage.getMessage());
             }
         }
 
@@ -175,8 +180,12 @@ public class UserController {
                 System.out.println("  Price: $" + photographer.getPrice());
                 System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                model.addAttribute("error", "Failed to reserve photographer: " + e.getMessage());
-                return "error"; // Redirect to an error page or handle accordingly
+                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
+                photographerReservationId = null;
+                photographerId = null;
+                errorOrderMessage.setErrorTrue();
+                errorOrderMessage.addToMessage("Photographer");
+                model.addAttribute("error", errorOrderMessage.getMessage());
             }
         } else {
             System.out.println("Photographer ID is null or empty, skipping reservation.");
@@ -202,23 +211,30 @@ public class UserController {
                 System.out.println("  Price: $" + catering.getPrice());
                 System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                model.addAttribute("error", "Failed to reserve catering company: " + e.getMessage());
-                return "error"; // Redirect to an error page or handle accordingly
+                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
+                cateringReservationId = null;
+                cateringId = null;
+                errorOrderMessage.setErrorTrue();
+                errorOrderMessage.addToMessage("Catering");
+                model.addAttribute("error", errorOrderMessage.getMessage());
             }
         } else {
             System.out.println("Catering ID is null or empty, skipping reservation.");
         }
 
+        model.addAttribute("venueReservationId", venueReservationId);
+        model.addAttribute("photographerReservationId", photographerReservationId);
+        model.addAttribute("cateringReservationId", cateringReservationId);
         model.addAttribute("venue", venue);
         model.addAttribute("photographer", photographer);
         model.addAttribute("catering", catering);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("date", date);
         model.addAttribute("location", location);
-        model.addAttribute("venueReservationId", venueReservationId);
-        model.addAttribute("photographerReservationId", photographerReservationId);
-        model.addAttribute("cateringReservationId", cateringReservationId);
 
+        if(errorOrderMessage.isError()){
+            return "error"; //TODO: how can this reroute to error
+        }
         return "confirm";
     }
 
@@ -242,8 +258,26 @@ public class UserController {
 
 
     @GetMapping("/error")
-    public String error(@RequestParam(required = false) String message, Model model) {
+    public String error(@RequestParam(required = false) String message,
+                        @RequestParam(required = false) String venueReservationId,
+                        @RequestParam(required = false) String photographerReservationId,
+                        @RequestParam(required = false) String cateringReservationId,
+                        @RequestParam(required = false) String venueId,
+                        @RequestParam(required = false) String photographerId,
+                        @RequestParam(required = false) String cateringId,
+                        @RequestParam String date,
+                        @RequestParam String location,
+                        Model model) {
         model.addAttribute("errorMessage", message != null ? message : "An unknown error occurred.");
+        model.addAttribute("venueReservationId", venueReservationId);
+        model.addAttribute("photographerReservationId", photographerReservationId);
+        model.addAttribute("cateringReservationId", cateringReservationId);
+        model.addAttribute("venueId", venueId);
+        model.addAttribute("photographerId", photographerId);
+        model.addAttribute("cateringId", cateringId);
+        model.addAttribute("date", date);
+        model.addAttribute("location", location);
+
         return "error"; // You might want to create a simple error.html page
     }
 }
