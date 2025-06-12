@@ -45,7 +45,11 @@
 <body class="bg-gray-50 pb-20">
 <section class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl text-pink-600 text-center font-bold mb-8" th:text="${error}"></h1>
+        <h2 class="text-4xl text-pink-600 text-center font-bold mb-8" th:text="${error}"></h2>
+        <h2 class="text-4xl text-pink-600 text-center font-bold mb-8">You can return to the home page</h2>
+        <h2 class="text-4xl text-pink-600 text-center font-bold mb-8" th:if="${venueId != null or photographerId != null or cateringId != null}">or</h2>
+        <h2 class="text-4xl text-pink-600 text-center font-bold mb-8" th:if="${venueId != null or photographerId != null or cateringId != null}">You make your booking without this service</h2>
+
         <div class="flex flex-col md:flex-row gap-8">
             <div class="w-full md:w-1/2">
                 <!-- Cancel and go home -->
