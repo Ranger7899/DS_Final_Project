@@ -48,31 +48,59 @@ public class OrderController {
     public String placeOrder(@ModelAttribute OrderRequest orderRequest,
                              Model model, // Keep model for initial page rendering
                              RedirectAttributes redirectAttributes) { // Use RedirectAttributes for flash messages
-        try {
+
             Venue venue = null;
             Photographer photographer = null;
             Catering catering = null;
             int totalPrice = 0;
 
+            boolean error = false;
+            String errorMessage = null;
+
             // Confirm venue if selected
             if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
-                venueClient.confirm(orderRequest.getVenueReservationId());
-                venue = venueClient.getVenueById(orderRequest.getVenueId());
-                totalPrice += venue.getPrice();
+                try {
+                    venueClient.confirm(orderRequest.getVenueReservationId());
+                    venue = venueClient.getVenueById(orderRequest.getVenueId());
+                    totalPrice += venue.getPrice();
+                }catch (Exception e){
+                    error = true;
+                    errorMessage = e.getMessage();
+                    venue = null;
+                }
             }
 
             // Confirm photographer if selected
             if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
-                photographerClient.confirm(orderRequest.getPhotographerReservationId());
-                photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
-                totalPrice += photographer.getPrice();
+                try{
+                    photographerClient.confirm(orderRequest.getPhotographerReservationId());
+                    photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
+                    totalPrice += photographer.getPrice();
+                }catch (Exception e){
+                    error = true;
+                    errorMessage = e.getMessage();
+                    photographer = null;
+                }
             }
 
             // Confirm catering if selected
             if (orderRequest.getCateringId() != null && !orderRequest.getCateringId().isEmpty()) {
-                cateringClient.confirm(orderRequest.getCateringReservationId());
-                catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
-                totalPrice += catering.getPrice();
+                try {
+                    cateringClient.confirm(orderRequest.getCateringReservationId());
+                    catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
+                    totalPrice += catering.getPrice();
+                }catch (Exception e){
+                    error = true;
+                    errorMessage = e.getMessage();
+                    catering = null;
+                }
+            }
+            if(error){
+                redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+                redirectAttributes.addFlashAttribute("venueReservationId",orderRequest.getVenueReservationId());
+                redirectAttributes.addFlashAttribute("photographerReservationId",orderRequest.getPhotographerReservationId());
+                redirectAttributes.addFlashAttribute("cateringReservationId",orderRequest.getCateringReservationId());
+                return "redirect:/order/errorconfirm";
             }
 
             // --- Create and save the Order entity to the database ---
@@ -103,26 +131,21 @@ public class OrderController {
 
             orderRepository.save(newOrder); // Save the order to your local database
 
-
             redirectAttributes.addFlashAttribute("venue", venue);
             redirectAttributes.addFlashAttribute("photographer", photographer);
             redirectAttributes.addFlashAttribute("catering", catering);
+
             redirectAttributes.addFlashAttribute("totalPrice", totalPrice);
             redirectAttributes.addFlashAttribute("date", orderRequest.getDate());
             redirectAttributes.addFlashAttribute("location", orderRequest.getLocation());
             redirectAttributes.addFlashAttribute("address", orderRequest.getAddress());
             redirectAttributes.addFlashAttribute("paymentDetails", orderRequest.getPaymentDetails());
+
             redirectAttributes.addFlashAttribute("message", "Order successfully booked and saved!");
             redirectAttributes.addFlashAttribute("messageType", "success");
 
-
             return "redirect:/order/success";
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("message", "Error booking order: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("messageType", "error");
-            return "redirect:/error?message=" + e.getMessage(); // Redirect to a generic error page
-        }
+
     }
 
 
@@ -163,5 +186,11 @@ public class OrderController {
         model.addAttribute("orders", userOrders);
         model.addAttribute("viewingUserId", userId); // Optionally pass the userId for display on the page
         return "myOrders"; // Assumes you create a Thymeleaf HTML file named myOrders.html
+    }
+
+    @GetMapping("/errorconfirm")
+    public String error(RedirectAttributes redirectAttributes,
+                        Model model) {
+        return "errorconfirm";
     }
 }
