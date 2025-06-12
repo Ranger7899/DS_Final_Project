@@ -57,7 +57,7 @@ public class SecurityConfig {
     SecurityFilterChain managerChain(HttpSecurity http) throws Exception {
         http
                 // IMPORTANT: include both the START and the CALLBACK paths
-                .securityMatcher("/manager/**", "/oauth2/**", "/login/oauth2/**")
+                .securityMatcher("/manager/**", "/oauth2/**", "/login/oauth2/**", "/login/oauth2")
 
                 .authorizeHttpRequests(a -> a
                         // let Spring hit these URLs without authentication
