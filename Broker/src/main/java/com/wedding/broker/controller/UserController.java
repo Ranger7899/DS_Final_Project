@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -254,17 +256,17 @@ public class UserController {
         CateringReservation cateringReservation = null;
         //Check connection to suppliers works before cancelling
         try{
-            if(photographerReservationId != null) {
+            if(photographerReservationId != null  && !photographerReservationId.trim().isEmpty()) {
                 photographerReservation = photographerClient.getPhotographerReservationById(photographerReservationId);
             }
-            if(venueReservationId != null){
+            if(venueReservationId != null && !venueReservationId.trim().isEmpty()){
                 venueReservation = venueClient.getVenueReservationById(venueReservationId);
             }
-            if(cateringReservationId != null){
+            if(cateringReservationId != null && !cateringReservationId.trim().isEmpty()){
                 cateringReservation = cateringClient.getCateringReservationById(cateringReservationId);
             }
         }catch (Exception e){
-            return "redirect:/cancel-error/"+e.getMessage();
+            return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
         //cancel orders when they are all ok
         try {
@@ -278,7 +280,7 @@ public class UserController {
                 cateringClient.cancel(cateringReservationId);
             }
         } catch (Exception e) {
-            return "redirect:/cancel-error/"+e.getMessage();
+            return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
         //change order from Confirmed to Cancelled in broker dB
         if(orderId != null){
@@ -290,7 +292,7 @@ public class UserController {
                     orderRepository.save(order);
                 }
             }catch (Exception e){
-                return "redirect:/cancel-error/"+e.getMessage();
+                return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             }
         }
         return "redirect:/";
@@ -321,11 +323,11 @@ public class UserController {
         return "error"; // You might want to create a simple error.html page
     }
 
-    @GetMapping("/cancel-error")
+    @GetMapping("/errorcancel")
     public String cancelError(@RequestParam String message,
                               Model model){
         model.addAttribute("errorMessage", message);
-        return "cancel-error";
+        return "errorcancel";
 
     }
 }
