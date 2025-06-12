@@ -2,6 +2,7 @@ package com.wedding.broker.controller;
 
 import com.wedding.broker.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,5 +20,27 @@ public class ManagerController {
     public String orders(Model model) {
         model.addAttribute("orders", orderRepository.findAll());
         return "manager/orders";
+    }
+
+
+    @Value("${venue.service.api.base-url}")
+    private String venueServiceApiBaseUrl;
+
+    @Value("${photographer.service.api.base-url}")
+    private String photographerServiceApiBaseUrl;
+
+    @Value("${catering.service.api.base-url}")
+    private String cateringServiceApiBaseUrl;
+
+    @Value("${venue.api.url}")
+    private String appBaseUrl;
+    @GetMapping("/oauth2/**")
+    public String loginoAuth2(Model model) {
+        model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
+        model.addAttribute("photographerServiceApiBaseUrl", photographerServiceApiBaseUrl);
+        model.addAttribute("cateringServiceApiBaseUrl", cateringServiceApiBaseUrl);
+
+        model.addAttribute("appBaseUrl", appBaseUrl);
+        return "redirect:/";
     }
 }
