@@ -83,7 +83,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/", "/home", "/confirm","/error","/confirm/**","/complete","/order","/order/**","/services/**",
                                 "/register", "/images/**","/verify-email","/verify-email/**" ,"/css/**", "/js/**",
-                                "/login**", "/createOrder**", "/orderSuccess","/orders","/orders/**").permitAll() // Keep this to ensure /login with params is accessible
+                                "/login**", "/createOrder**", "/orderSuccess","/orders","/orders/**", "/error", "/error/**", "/cancel-reservations", "/cancel-reservations/**").permitAll() // Keep this to ensure /login with params is accessible
                         .anyRequest().authenticated())
                 .formLogin(f -> f.loginPage("/login").permitAll().failureHandler(authenticationFailureHandler()))
                 .logout(l -> l
