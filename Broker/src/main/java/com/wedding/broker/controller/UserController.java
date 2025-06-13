@@ -140,6 +140,43 @@ public class UserController {
         Catering catering = null;
         int totalPrice = 0;
         ErrorOrderMessage errorOrderMessage = new ErrorOrderMessage();
+        //get before
+        try{
+            if(venueReservationId != null && !venueReservationId.trim().isEmpty()){
+                venue = venueClient.getVenueById(venueId);
+            }
+        } catch (Exception e) {
+            errorOrderMessage.setErrorTrue();
+            errorOrderMessage.addToMessage("Venue");
+            model.addAttribute("error", errorOrderMessage.getMessage());
+        }
+        try{
+            if(photographerId != null  && !photographerId.trim().isEmpty()) {
+                photographer = photographerClient.getPhotographerById(photographerId);
+            }
+        } catch (Exception e) {
+            errorOrderMessage.setErrorTrue();
+            errorOrderMessage.addToMessage("Photographer");
+            model.addAttribute("error", errorOrderMessage.getMessage());
+        }
+        try{
+            if(cateringReservationId != null && !cateringReservationId.trim().isEmpty()){
+                catering= cateringClient.getCateringCompanyById(cateringId);
+            }
+        } catch (Exception e) {
+            errorOrderMessage.setErrorTrue();
+            errorOrderMessage.addToMessage("Catering Company");
+            model.addAttribute("error", errorOrderMessage.getMessage());
+        }
+        if(errorOrderMessage.isError()){
+            model.addAttribute("venueId", venueId);
+            model.addAttribute("photographerId", photographerId);
+            model.addAttribute("cateringId", cateringId);
+            model.addAttribute("venueReservationId", venueReservationId);
+            model.addAttribute("photographerReservationId", photographerReservationId);
+            model.addAttribute("cateringReservationId", cateringReservationId);
+            return "error";
+        }
 
         // Reserve Venue
         if (venueReservationId != null && venueId != null && !venueId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
@@ -149,7 +186,6 @@ public class UserController {
             try {
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venueReservationId = reservationVenue.getId();
-                venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
             } catch (HttpClientErrorException e) {
                 venueReservationId = null;
@@ -168,7 +204,6 @@ public class UserController {
             try {
                 PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
                 photographerReservationId = reservationPhotographer.getId();
-                photographer = photographerClient.getPhotographerById(photographerId);
                 totalPrice += photographer.getPrice();
             } catch (HttpClientErrorException e) {
                 photographerReservationId = null;
@@ -181,13 +216,11 @@ public class UserController {
 
         // Reserve Catering
         if (cateringReservationId != null && cateringId != null && !cateringId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
-            catering = cateringClient.getCateringCompanyById(cateringId);
             totalPrice += catering.getPrice();
         } else if (cateringId != null && !cateringId.trim().isEmpty()) {
             try {
                 CateringReservation reservationCatering = cateringClient.reserve(cateringId, date, location);
                 cateringReservationId = reservationCatering.getId();
-                catering = cateringClient.getCateringCompanyById(cateringId);
                 totalPrice += catering.getPrice();
             } catch (HttpClientErrorException e) {
                 cateringReservationId = null;
@@ -216,7 +249,7 @@ public class UserController {
             model.addAttribute("venueReservationId", venueReservationId);
             model.addAttribute("photographerReservationId", photographerReservationId);
             model.addAttribute("cateringReservationId", cateringReservationId);
-            return "error"; //TODO: how can this reroute to error
+            return "error";
         }
         return "confirm";
     }
