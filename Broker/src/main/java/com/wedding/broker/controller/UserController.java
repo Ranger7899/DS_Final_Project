@@ -143,32 +143,37 @@ public class UserController {
         //get before
         try{
             if(venueReservationId != null && !venueReservationId.trim().isEmpty()){
-                venue = venueClient.getVenueById(venueId);
+                venueClient.getVenueById(venueId);
             }
         } catch (Exception e) {
+            venueReservationId = null;
+            venueId = null;
             errorOrderMessage.setErrorTrue();
             errorOrderMessage.addToMessage("Venue");
-            model.addAttribute("error", errorOrderMessage.getMessage());
         }
         try{
             if(photographerId != null  && !photographerId.trim().isEmpty()) {
-                photographer = photographerClient.getPhotographerById(photographerId);
+                photographerClient.getPhotographerById(photographerId);
             }
         } catch (Exception e) {
+            photographerReservationId = null;
+            photographerId = null;
             errorOrderMessage.setErrorTrue();
             errorOrderMessage.addToMessage("Photographer");
-            model.addAttribute("error", errorOrderMessage.getMessage());
         }
         try{
             if(cateringReservationId != null && !cateringReservationId.trim().isEmpty()){
-                catering= cateringClient.getCateringCompanyById(cateringId);
+                cateringClient.getCateringCompanyById(cateringId);
             }
         } catch (Exception e) {
+            cateringReservationId = null;
+            cateringId = null;
             errorOrderMessage.setErrorTrue();
             errorOrderMessage.addToMessage("Catering Company");
-            model.addAttribute("error", errorOrderMessage.getMessage());
+
         }
         if(errorOrderMessage.isError()){
+            model.addAttribute("error", errorOrderMessage.getMessage());
             model.addAttribute("venueId", venueId);
             model.addAttribute("photographerId", photographerId);
             model.addAttribute("cateringId", cateringId);
@@ -186,6 +191,7 @@ public class UserController {
             try {
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venueReservationId = reservationVenue.getId();
+                venue = venueClient.getVenueById(venueId);
                 totalPrice += venue.getPrice();
             } catch (HttpClientErrorException e) {
                 venueReservationId = null;
@@ -204,6 +210,7 @@ public class UserController {
             try {
                 PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
                 photographerReservationId = reservationPhotographer.getId();
+                photographer = photographerClient.getPhotographerById(photographerId);
                 totalPrice += photographer.getPrice();
             } catch (HttpClientErrorException e) {
                 photographerReservationId = null;
@@ -216,11 +223,13 @@ public class UserController {
 
         // Reserve Catering
         if (cateringReservationId != null && cateringId != null && !cateringId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
+            catering= cateringClient.getCateringCompanyById(cateringId);
             totalPrice += catering.getPrice();
         } else if (cateringId != null && !cateringId.trim().isEmpty()) {
             try {
                 CateringReservation reservationCatering = cateringClient.reserve(cateringId, date, location);
                 cateringReservationId = reservationCatering.getId();
+                catering= cateringClient.getCateringCompanyById(cateringId);
                 totalPrice += catering.getPrice();
             } catch (HttpClientErrorException e) {
                 cateringReservationId = null;
@@ -306,6 +315,8 @@ public class UserController {
         }
         return "redirect:/";
     }
+
+
 
 
     @GetMapping("/error")
