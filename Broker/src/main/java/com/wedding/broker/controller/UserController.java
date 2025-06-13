@@ -141,25 +141,12 @@ public class UserController {
         String cateringReservationId = null;
         ErrorOrderMessage errorOrderMessage = new ErrorOrderMessage();
 
-        try{
-            if (venueId != null && !venueId.trim().isEmpty()){
-                venue = venueClient.getVenueById(venueId);
-            }
-            if (photographerId != null && !photographerId.trim().isEmpty()){
-                photographer = photographerClient.getPhotographerById(photographerId);
-            }
-            if (cateringId != null && !cateringId.trim().isEmpty()){
-                catering = cateringClient.getCateringCompanyById(cateringId);
-            }
-        }catch(Exception e){
-            return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-
         if (venueId != null && !venueId.trim().isEmpty()) {
             try {
                 // Reserve venue
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venueReservationId = reservationVenue.getId();
+                venue = venueClient.getVenueById(venueId);
 
                 totalPrice += venue.getPrice();
                 System.out.println("Venue Reserved:");
@@ -187,6 +174,8 @@ public class UserController {
                 // Reserve photographer
                 PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
                 photographerReservationId = reservationPhotographer.getId();
+                photographer = photographerClient.getPhotographerById(photographerId);
+
                 totalPrice += photographer.getPrice();
 
                 // Debug log
@@ -217,6 +206,7 @@ public class UserController {
                 // Reserve
                 CateringReservation reservationCatering = cateringClient.reserve(cateringId, date, location);
                 cateringReservationId = reservationCatering.getId();
+                catering = cateringClient.getCateringCompanyById(cateringId);
                 totalPrice += catering.getPrice();
 
                 // Debug log
