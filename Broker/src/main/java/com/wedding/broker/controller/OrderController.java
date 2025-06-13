@@ -143,8 +143,15 @@ public class OrderController {
             newOrder.setAddress(orderRequest.getAddress());
             newOrder.setPaymentDetails(orderRequest.getPaymentDetails());
 
-            orderRepository.save(newOrder); // Save the order to your local database
-
+            try {
+                orderRepository.save(newOrder); // Save the order to your local database
+            }catch (Exception e){
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("venueReservationId",orderRequest.getVenueReservationId());
+                redirectAttributes.addFlashAttribute("photographerReservationId",orderRequest.getPhotographerReservationId());
+                redirectAttributes.addFlashAttribute("cateringReservationId",orderRequest.getCateringReservationId());
+                return "redirect:/order/error-confirm";
+            }
             redirectAttributes.addFlashAttribute("venue", venue);
             redirectAttributes.addFlashAttribute("photographer", photographer);
             redirectAttributes.addFlashAttribute("catering", catering);
