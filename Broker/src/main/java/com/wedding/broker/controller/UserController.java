@@ -287,6 +287,18 @@ public class UserController {
             return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
         //cancel orders when they are all ok
+        if(orderId != null){
+            try {
+                Optional<Order> orderOptional = orderRepository.findById(Long.valueOf(orderId));
+                if (orderOptional.isPresent()) {
+                    Order order = orderOptional.get();
+                    order.setStatus("Cancelled");
+                    orderRepository.save(order);
+                }
+            }catch (Exception e){
+                return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            }
+        }
         try {
             if (venueReservationId != null && !venueReservationId.trim().isEmpty()) {
                 venueClient.cancel(venueReservationId);
@@ -301,18 +313,7 @@ public class UserController {
             return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
         //change order from Confirmed to Cancelled in broker dB
-        if(orderId != null){
-            try {
-                Optional<Order> orderOptional = orderRepository.findById(Long.valueOf(orderId));
-                if (orderOptional.isPresent()) {
-                    Order order = orderOptional.get();
-                    order.setStatus("Cancelled");
-                    orderRepository.save(order);
-                }
-            }catch (Exception e){
-                return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            }
-        }
+
         return "redirect:/";
     }
 
