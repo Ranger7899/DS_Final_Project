@@ -67,11 +67,14 @@
         <input type="hidden" name="venueReservationId" th:value="${order.venueId}" />
         <input type="hidden" name="photographerReservationId" th:value="${order.photographerId}" />
         <input type="hidden" name="cateringReservationId" th:value="${order.cateringId}" />
-        <input type="hidden" name="orderId" th:value="${order.id}" />>
+        <input type="hidden" name="orderId" th:value="${order.id}" />
         <button type="submit"
-                class="w-full px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-md hover:bg-red-600 transition-colors">
-          Cancel Active Reservations
-        </button>
+              class="w-full px-4 py-2 text-sm font-semibold rounded-md transition-colors
+                    bg-red-500 text-white hover:bg-red-600
+                    disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+              th:disabled="${order.status == 'Cancelled'}">
+        Cancel Active Reservations
+      </button>
       </form>
 
     </div>

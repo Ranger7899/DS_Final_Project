@@ -241,6 +241,9 @@ public class UserController {
         model.addAttribute("location", location);
 
         if(errorOrderMessage.isError()){
+            model.addAttribute("venueId", venueId);
+            model.addAttribute("photographerId", photographerId);
+            model.addAttribute("cateringId", cateringId);
             return "error"; //TODO: how can this reroute to error
         }
         return "confirm";
