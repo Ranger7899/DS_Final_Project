@@ -122,11 +122,14 @@ public class UserController {
 
     @GetMapping("/confirm")
     public String booking(@RequestParam(required = false) String venueId,
-                        @RequestParam(required = false) String photographerId,
-                        @RequestParam(required = false) String cateringId,
-                        @RequestParam String date,
-                        @RequestParam String location,
-                        Model model) {
+        @RequestParam(required = false) String photographerId,
+        @RequestParam(required = false) String cateringId,
+        @RequestParam(required = false) String venueReservationId,
+        @RequestParam(required = false) String photographerReservationId,
+        @RequestParam(required = false) String cateringReservationId,
+        @RequestParam String date,
+        @RequestParam String location,
+        Model model) {
 
         model.addAttribute("appBaseUrl", appBaseUrl);
         model.addAttribute("photographerBaseUrl", photographerBaseUrl);
@@ -136,29 +139,19 @@ public class UserController {
         Photographer photographer = null;
         Catering catering = null;
         int totalPrice = 0;
-        String venueReservationId = null;
-        String photographerReservationId = null;
-        String cateringReservationId = null;
         ErrorOrderMessage errorOrderMessage = new ErrorOrderMessage();
 
-        if (venueId != null && !venueId.trim().isEmpty()) {
+        // Reserve Venue
+        if (venueReservationId != null && venueId != null && !venueId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
+            venue = venueClient.getVenueById(venueId);
+            totalPrice += venue.getPrice();
+        } else if (venueId != null && !venueId.trim().isEmpty()) {
             try {
-                // Reserve venue
                 VenueReservation reservationVenue = venueClient.reserve(venueId, date, location);
                 venueReservationId = reservationVenue.getId();
                 venue = venueClient.getVenueById(venueId);
-
                 totalPrice += venue.getPrice();
-                System.out.println("Venue Reserved:");
-                System.out.println("  Reservation ID: " + reservationVenue.getId());
-                System.out.println("  Venue ID: " + venue.getId());
-                System.out.println("  Name: " + venue.getName());
-                System.out.println("  Location: " + location);
-                System.out.println("  Date: " + date);
-                System.out.println("  Price: $" + venue.getPrice());
-                System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
                 venueReservationId = null;
                 venueId = null;
                 errorOrderMessage.setErrorTrue();
@@ -167,68 +160,44 @@ public class UserController {
             }
         }
 
-        if (photographerId != null && !photographerId.trim().isEmpty()) {
+        // Reserve Photographer
+        if (photographerReservationId != null && photographerId != null && !photographerId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
+            photographer = photographerClient.getPhotographerById(photographerId);
+            totalPrice += photographer.getPrice();
+        } else if (photographerId != null && !photographerId.trim().isEmpty()) {
             try {
-                // Debug input
-                System.out.println("Attempting to reserve photographer with ID: " + photographerId);
-                // Reserve photographer
                 PhotographerReservation reservationPhotographer = photographerClient.reserve(photographerId, date, location);
                 photographerReservationId = reservationPhotographer.getId();
                 photographer = photographerClient.getPhotographerById(photographerId);
-
                 totalPrice += photographer.getPrice();
-
-                // Debug log
-                System.out.println("Photographer Reserved:");
-                System.out.println("  Reservation ID: " + reservationPhotographer.getId());
-                System.out.println("  Photographer ID: " + photographer.getId());
-                System.out.println("  Name: " + photographer.getName());
-                System.out.println("  Location: " + location);
-                System.out.println("  Date: " + date);
-                System.out.println("  Price: $" + photographer.getPrice());
-                System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
                 photographerReservationId = null;
                 photographerId = null;
                 errorOrderMessage.setErrorTrue();
                 errorOrderMessage.addToMessage("Photographer");
                 model.addAttribute("error", errorOrderMessage.getMessage());
             }
-        } else {
-            System.out.println("Photographer ID is null or empty, skipping reservation.");
         }
 
-        if (cateringId != null && !cateringId.trim().isEmpty()) {
+        // Reserve Catering
+        if (cateringReservationId != null && cateringId != null && !cateringId.trim().isEmpty()) { //Handle if someone continuing their reservation from the error page
+            catering = cateringClient.getCateringCompanyById(cateringId);
+            totalPrice += catering.getPrice();
+        } else if (cateringId != null && !cateringId.trim().isEmpty()) {
             try {
-                // Debug input
-                System.out.println("Attempting to reserve catering company with ID: " + cateringId);
-                // Reserve
                 CateringReservation reservationCatering = cateringClient.reserve(cateringId, date, location);
                 cateringReservationId = reservationCatering.getId();
                 catering = cateringClient.getCateringCompanyById(cateringId);
                 totalPrice += catering.getPrice();
-
-                // Debug log
-                System.out.println("Photographer Reserved:");
-                System.out.println("  Reservation ID: " + reservationCatering.getId());
-                System.out.println("  CateringCompany ID: " + catering.getId());
-                System.out.println("  Name: " + catering.getName());
-                System.out.println("  Location: " + location);
-                System.out.println("  Date: " + date);
-                System.out.println("  Price: $" + catering.getPrice());
-                System.out.println("  Timeout: 30 minutes");
             } catch (HttpClientErrorException e) {
-                //model.addAttribute("error", "Failed to reserve venue: " + e.getMessage());
                 cateringReservationId = null;
                 cateringId = null;
                 errorOrderMessage.setErrorTrue();
                 errorOrderMessage.addToMessage("Catering");
                 model.addAttribute("error", errorOrderMessage.getMessage());
             }
-        } else {
-            System.out.println("Catering ID is null or empty, skipping reservation.");
         }
+
 
         model.addAttribute("venueReservationId", venueReservationId);
         model.addAttribute("photographerReservationId", photographerReservationId);
@@ -241,6 +210,12 @@ public class UserController {
         model.addAttribute("location", location);
 
         if(errorOrderMessage.isError()){
+            model.addAttribute("venueId", venueId);
+            model.addAttribute("photographerId", photographerId);
+            model.addAttribute("cateringId", cateringId);
+            model.addAttribute("venueReservationId", venueReservationId);
+            model.addAttribute("photographerReservationId", photographerReservationId);
+            model.addAttribute("cateringReservationId", cateringReservationId);
             return "error"; //TODO: how can this reroute to error
         }
         return "confirm";

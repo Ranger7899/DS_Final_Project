@@ -34,13 +34,4 @@ public class ManagerController {
 
     @Value("${venue.api.url}")
     private String appBaseUrl;
-    @GetMapping("/oauth2/**")
-    public String loginoAuth2(Model model) {
-        model.addAttribute("venueServiceApiBaseUrl", venueServiceApiBaseUrl);
-        model.addAttribute("photographerServiceApiBaseUrl", photographerServiceApiBaseUrl);
-        model.addAttribute("cateringServiceApiBaseUrl", cateringServiceApiBaseUrl);
-
-        model.addAttribute("appBaseUrl", appBaseUrl);
-        return "redirect:/";
-    }
 }
