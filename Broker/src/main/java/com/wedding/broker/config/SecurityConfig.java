@@ -27,8 +27,11 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -57,7 +60,7 @@ public class SecurityConfig {
     SecurityFilterChain managerChain(HttpSecurity http) throws Exception {
         http
                 // IMPORTANT: include both the START and the CALLBACK paths
-                .securityMatcher("/manager/**", "/oauth2/**", "/login/oauth2/**", "/login/oauth2")
+                .securityMatcher("/manager/**")
 
                 .authorizeHttpRequests(a -> a
                         // let Spring hit these URLs without authentication
@@ -75,6 +78,23 @@ public class SecurityConfig {
 
 
 
+
+    private AuthenticationSuccessHandler oauth2SuccessHandler() {
+        var delegate = new SavedRequestAwareAuthenticationSuccessHandler();
+        return (request, response, authentication) -> {
+            boolean isManager = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+
+            if (isManager) {
+                delegate.onAuthenticationSuccess(request, response, authentication);
+            } else {
+                // Make sure we don’t redirect back to /manager/**
+                new HttpSessionRequestCache().removeRequest(request, response);
+                response.sendRedirect("/");
+            }
+        };
+    }
+
     /* 2. Everyone else -> form login */
     @Bean @Order(2)
     SecurityFilterChain siteChain(HttpSecurity http,
@@ -86,6 +106,11 @@ public class SecurityConfig {
                                 "/login**", "/createOrder**", "/orderSuccess","/orders","/orders/**", "/error", "/error/**", "/cancel-reservations", "/cancel-reservations/**").permitAll() // Keep this to ensure /login with params is accessible
                         .anyRequest().authenticated())
                 .formLogin(f -> f.loginPage("/login").permitAll().failureHandler(authenticationFailureHandler()))
+                .oauth2Login(o -> o
+                        // same entry point you used in the link
+                        .loginPage("/oauth2/authorization/auth0")
+                        // success handler that steers managers vs. visitors
+                        .successHandler(oauth2SuccessHandler()))
                 .logout(l -> l
                         .logoutUrl("/logout")                  // <a href="/logout"> in home.html
                         .logoutSuccessHandler(oidcAndLocalLogoutSuccessHandler)
