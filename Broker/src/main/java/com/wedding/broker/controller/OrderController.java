@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime; // For setting timestamps
 import java.util.List;
 // import org.springframework.security.core.context.SecurityContextHolder; // For getting authenticated user
@@ -57,12 +59,25 @@ public class OrderController {
 
             boolean error = false;
             String errorMessage = null;
+            //Get incase it does not work:
+            try{
+                if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().trim().isEmpty()){
+                    venue = venueClient.getVenueById(orderRequest.getVenueId());
+                }
+                if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().trim().isEmpty()){
+                    photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
+                }
+                if (orderRequest.getCateringId() != null && !orderRequest.getCateringId().trim().isEmpty()){
+                    catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
+                }
+            }catch(Exception e){
+                return "redirect:/errorcancel?message=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            }
 
             // Confirm venue if selected
             if (orderRequest.getVenueId() != null && !orderRequest.getVenueId().isEmpty()) {
                 try {
                     venueClient.confirm(orderRequest.getVenueReservationId());
-                    venue = venueClient.getVenueById(orderRequest.getVenueId());
                     totalPrice += venue.getPrice();
                 }catch (Exception e){
                     error = true;
@@ -75,7 +90,6 @@ public class OrderController {
             if (orderRequest.getPhotographerId() != null && !orderRequest.getPhotographerId().isEmpty()) {
                 try{
                     photographerClient.confirm(orderRequest.getPhotographerReservationId());
-                    photographer = photographerClient.getPhotographerById(orderRequest.getPhotographerId());
                     totalPrice += photographer.getPrice();
                 }catch (Exception e){
                     error = true;
@@ -88,7 +102,6 @@ public class OrderController {
             if (orderRequest.getCateringId() != null && !orderRequest.getCateringId().isEmpty()) {
                 try {
                     cateringClient.confirm(orderRequest.getCateringReservationId());
-                    catering = cateringClient.getCateringCompanyById(orderRequest.getCateringId());
                     totalPrice += catering.getPrice();
                 }catch (Exception e){
                     error = true;
