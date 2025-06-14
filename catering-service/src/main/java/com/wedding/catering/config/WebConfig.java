@@ -12,7 +12,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:8082") // frontend port
+                        .allowedOrigins("https://broker.purplemushroom-69ff1346.francecentral.azurecontainerapps.io") // frontend port
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }
