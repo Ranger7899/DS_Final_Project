@@ -19,6 +19,16 @@ public class PhotographerController {
     @Autowired
     private PhotographerService photographerService;
 
+    @GetMapping("/reservation/{id}")
+    public ResponseEntity<?> getReservationById(@PathVariable Long id){
+        try{
+            Reservation reservation = photographerService.getReservationById(id);
+            return ResponseEntity.ok(reservation);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
+        }
+    }
+
     @GetMapping("/available")
     public ResponseEntity<List<Photographer>> getAvailablePhotographers(
             @RequestParam String date,
@@ -74,16 +84,6 @@ public class PhotographerController {
         try {
             Photographer photographer = photographerService.getPhotographerById(id); //
             return ResponseEntity.ok(photographer); //
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
-        }
-    }
-
-    @GetMapping("/reservation/{id}")
-    public ResponseEntity<?> getReservationById(@PathVariable Long id){
-        try{
-            Reservation reservation = photographerService.getReservationById(id);
-            return ResponseEntity.ok(reservation);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //
         }

@@ -22,6 +22,15 @@ public class PhotographerService {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    public Reservation getReservationById(Long reservationID){
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationID);
+        if(optionalReservation.isPresent()){
+            return optionalReservation.get();
+        }else {
+            throw new RuntimeException("Reserrvation " + reservationID + " not found.");
+        }
+    }
+
     public List<Photographer> getAvailablePhotographers(String dateString, String location){
         LocalDate date = LocalDate.parse(dateString);
         if (date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusYears(2))) {
@@ -36,15 +45,6 @@ public class PhotographerService {
             return optionalPhotographer.get(); //
         } else {
             throw new RuntimeException("Venue with ID " + photographerID + " not found."); //
-        }
-    }
-
-    public Reservation getReservationById(Long reservationID){
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationID);
-        if(optionalReservation.isPresent()){
-            return optionalReservation.get();
-        }else{
-            throw new RuntimeException("Reserrvation " + reservationID + " not found.");
         }
     }
 

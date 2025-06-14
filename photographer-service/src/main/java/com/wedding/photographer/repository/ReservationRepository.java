@@ -17,6 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByPhotoIdAndDateAndStatusIn(Long photoId, LocalDate date, List<String> statuses);
 
     List<Reservation> findByCreatedBefore(LocalDateTime timeoutTime); //TODO: delete this if necessary
+
     Optional<Reservation> findById(Long id);
     @Transactional
     @Modifying
