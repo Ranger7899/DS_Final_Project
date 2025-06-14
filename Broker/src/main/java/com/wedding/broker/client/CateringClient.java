@@ -16,12 +16,15 @@ public class CateringClient {
     private final RestTemplate restTemplate;
     private final String cateringApiUrl;
 
-    public CateringClient(RestTemplate restTemplate, @Value("http://localhost:8084") String cateringApiUrl) {
+    public CateringClient(RestTemplate restTemplate, @Value("${catering.api.url}") String cateringApiUrl) {
         this.restTemplate = restTemplate;
         this.cateringApiUrl = cateringApiUrl;
     }
 
     public List<Catering> getAvailableCompanies(String date, String location) {
+        System.out.println("URL base: " + cateringApiUrl);
+        String fullUrl = cateringApiUrl + "/catering/available?date=" + date + "&location=" + location;
+        System.out.println("Requesting: " + fullUrl);
         return restTemplate.exchange(
                 cateringApiUrl + "/catering/available?date={date}&location={location}",
                 HttpMethod.GET,
